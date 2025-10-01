@@ -1,0 +1,38 @@
+[
+  {
+    "id": "1",
+    "title": "Understanding Transformer Architecture: A Deep Dive",
+    "slug": "understanding-transformer-architecture",
+    "content": "<p>Transformers have revolutionized natural language processing and are now being applied to various domains including computer vision...</p>",
+    "excerpt": "A comprehensive guide to understanding how transformer models work, from attention mechanisms to positional encodings.",
+    "cover_image_url": "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=400&fit=crop",
+    "tags": ["AI", "Deep Learning", "NLP", "Transformers"],
+    "status": "published",
+    "featured": true,
+    "created_date": "2024-09-15T10:00:00Z"
+  },
+  {
+    "id": "2",
+    "title": "Building Production-Ready ML Pipelines",
+    "slug": "building-production-ml-pipelines",
+    "content": "<p>Learn best practices for deploying machine learning models in production environments...</p>",
+    "excerpt": "Practical tips and strategies for creating robust, scalable ML pipelines that work in real-world applications.",
+    "cover_image_url": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&h=400&fit=crop",
+    "tags": ["MLOps", "Machine Learning", "Python", "Production"],
+    "status": "published",
+    "featured": true,
+    "created_date": "2024-09-01T14:30:00Z"
+  },
+  {
+    "id": "3",
+    "title": "Computer Vision: From CNNs to Vision Transformers",
+    "slug": "computer-vision-cnns-to-vit",
+    "content": "<p>Explore the evolution of computer vision architectures and how Vision Transformers are changing the landscape...</p>",
+    "excerpt": "An exploration of how computer vision has evolved from traditional CNNs to modern Vision Transformer architectures.",
+    "cover_image_url": "https://images.unsplash.com/photo-1535378917042-10a22c95931a?w=800&h=400&fit=crop",
+    "tags": ["Computer Vision", "Deep Learning", "CNN", "Vision Transformers"],
+    "status": "published",
+    "featured": false,
+    "created_date": "2024-08-20T09:15:00Z"
+  }
+]

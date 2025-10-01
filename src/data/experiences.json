@@ -1,0 +1,42 @@
+[
+  {
+    "id": "1",
+    "title": "Master of Science in Artificial Intelligence",
+    "organization": "Northeastern University",
+    "start_date": "2023-09-01",
+    "end_date": null,
+    "description": "Advanced studies in artificial intelligence, machine learning, deep learning, and their applications. Focus on developing practical skills for ML engineering and building scalable AI systems. Coursework includes Neural Networks, Computer Vision, Natural Language Processing, and Reinforcement Learning.",
+    "type": "education",
+    "current": true
+  },
+  {
+    "id": "2",
+    "title": "Machine Learning Research Assistant",
+    "organization": "Northeastern University AI Lab",
+    "start_date": "2024-01-01",
+    "end_date": null,
+    "description": "Conducting research on novel deep learning architectures for computer vision tasks. Developed and trained models achieving 15% improvement in accuracy over baseline approaches. Collaborated with a team of 5 researchers on published work.",
+    "type": "research",
+    "current": true
+  },
+  {
+    "id": "3",
+    "title": "Software Engineering Intern",
+    "organization": "Tech Innovation Corp",
+    "start_date": "2023-06-01",
+    "end_date": "2023-08-31",
+    "description": "Developed machine learning pipelines for predictive analytics. Built REST APIs using Python and FastAPI. Implemented data preprocessing workflows that reduced processing time by 40%. Worked with cross-functional teams in an Agile environment.",
+    "type": "work",
+    "current": false
+  },
+  {
+    "id": "4",
+    "title": "Bachelor of Technology in Information Technology",
+    "organization": "Gujarat Technological University",
+    "start_date": "2021-10-01",
+    "end_date": "2025-05-31",
+    "description": "Graduated with honors. Specialized in AI and Data Science. Completed capstone project on sentiment analysis using deep learning. GPA: 3.8/4.0. Chairperson of Machine Learning club and Secretary of IEEE Computer society.",
+    "type": "education",
+    "current": false
+  }
+]

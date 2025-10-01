@@ -1,0 +1,74 @@
+[
+  {
+    "id": "1",
+    "title": "AI-Powered Image Classifier",
+    "description": "Built a deep learning model using TensorFlow to classify images across 10 categories with 94% accuracy. Implemented data augmentation techniques and transfer learning using ResNet50. Deployed as a web application with React frontend.",
+    "technologies": ["Python", "TensorFlow", "Keras", "React", "Flask", "Docker"],
+    "github_url": "https://github.com/yourusername/image-classifier",
+    "demo_url": "https://image-classifier-demo.com",
+    "image_url": "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=800&h=600&fit=crop",
+    "category": "deep_learning",
+    "featured": true,
+    "created_date": "2024-03-15"
+  },
+  {
+    "id": "2",
+    "title": "Sentiment Analysis NLP Model",
+    "description": "Developed a natural language processing model to analyze customer reviews sentiment. Used BERT transformers and achieved 92% F1-score. Processed over 100K reviews and generated actionable insights through interactive dashboards.",
+    "technologies": ["Python", "PyTorch", "Transformers", "BERT", "Pandas", "Plotly"],
+    "github_url": "https://github.com/yourusername/sentiment-analysis",
+    "demo_url": null,
+    "image_url": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop",
+    "category": "machine_learning",
+    "featured": true,
+    "created_date": "2024-02-20"
+  },
+  {
+    "id": "3",
+    "title": "Real-time Object Detection System",
+    "description": "Created a real-time object detection system using YOLO v8. Optimized for edge devices achieving 30 FPS on Raspberry Pi. Implemented for security monitoring with alert notifications and video recording capabilities.",
+    "technologies": ["Python", "YOLO", "OpenCV", "Raspberry Pi", "MQTT"],
+    "github_url": "https://github.com/yourusername/object-detection",
+    "demo_url": "https://object-detection-demo.com",
+    "image_url": "https://images.unsplash.com/photo-1535378917042-10a22c95931a?w=800&h=600&fit=crop",
+    "category": "deep_learning",
+    "featured": true,
+    "created_date": "2024-01-10"
+  },
+  {
+    "id": "4",
+    "title": "Customer Churn Prediction",
+    "description": "Built a machine learning model to predict customer churn for a telecom company. Utilized ensemble methods (Random Forest, XGBoost) and achieved 88% accuracy. Performed extensive feature engineering and hyperparameter tuning.",
+    "technologies": ["Python", "Scikit-learn", "XGBoost", "Pandas", "Jupyter"],
+    "github_url": "https://github.com/yourusername/churn-prediction",
+    "demo_url": null,
+    "image_url": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=600&fit=crop",
+    "category": "data_science",
+    "featured": false,
+    "created_date": "2023-12-05"
+  },
+  {
+    "id": "5",
+    "title": "AI Chatbot with RAG",
+    "description": "Developed an intelligent chatbot using Retrieval Augmented Generation (RAG) architecture. Integrated LangChain and OpenAI GPT models with vector database for context-aware responses. Handles 1000+ queries with high accuracy.",
+    "technologies": ["Python", "LangChain", "OpenAI", "Pinecone", "FastAPI", "Next.js"],
+    "github_url": "https://github.com/yourusername/ai-chatbot",
+    "demo_url": "https://ai-chatbot-demo.com",
+    "image_url": "https://images.unsplash.com/photo-1531746790731-6c087fecd65a?w=800&h=600&fit=crop",
+    "category": "machine_learning",
+    "featured": false,
+    "created_date": "2023-11-15"
+  },
+  {
+    "id": "6",
+    "title": "Stock Price Predictor",
+    "description": "Created a time series forecasting model using LSTM neural networks to predict stock prices. Implemented technical indicators and sentiment analysis from financial news. Backtested strategies with historical data.",
+    "technologies": ["Python", "TensorFlow", "LSTM", "Pandas", "yfinance", "Streamlit"],
+    "github_url": "https://github.com/yourusername/stock-predictor",
+    "demo_url": "https://stock-predictor-demo.com",
+    "image_url": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&h=600&fit=crop",
+    "category": "deep_learning",
+    "featured": false,
+    "created_date": "2023-10-20"
+  }
+]
