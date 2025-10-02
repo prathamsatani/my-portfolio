@@ -11,17 +11,17 @@
   },
   {
     "id": "2",
-    "title": "Machine Learning Research Assistant",
-    "organization": "Northeastern University AI Lab",
-    "start_date": "2024-01-01",
-    "end_date": null,
+    "title": "Machine Learning Engineer Intern",
+    "organization": "Softmax AI",
+    "start_date": "2025-01-01",
+    "end_date": "2025-06-30",
     "description": "Conducting research on novel deep learning architectures for computer vision tasks. Developed and trained models achieving 15% improvement in accuracy over baseline approaches. Collaborated with a team of 5 researchers on published work.",
-    "type": "research",
+    "type": "Internship",
     "current": true
   },
   {
     "id": "3",
-    "title": "Software Engineering Intern",
+    "title": "Software Engineering - Machine Learning Intern",
     "organization": "Tech Innovation Corp",
     "start_date": "2023-06-01",
     "end_date": "2023-08-31",

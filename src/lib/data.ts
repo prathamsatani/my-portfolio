@@ -50,6 +50,15 @@ export interface BlogPost {
   status: "draft" | "published";
   featured: boolean;
   created_date: string;
+  likes: number;
+  comments: BlogComment[];
+}
+
+export interface BlogComment {
+  id: string;
+  author: string;
+  message: string;
+  date: string;
 }
 
 export const getUserData = (): UserData => {

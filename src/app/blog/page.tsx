@@ -2,30 +2,53 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { getBlogPosts, type BlogPost } from "@/lib/data";
+import type { BlogPost } from "@/lib/data";
+import { Heart, MessageCircle, Share2 } from "lucide-react";
 
 export default function BlogPage() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<boolean>(false);
+  const [likeCounts, setLikeCounts] = useState<Record<string, number>>({});
+  const [shareFeedback, setShareFeedback] = useState<Record<string, string | undefined>>({});
 
   useEffect(() => {
     const checkUser = async () => {
       try {
         // In a real app, check authentication here
         setUser(false);
-      } catch (e) {
+      } catch {
         setUser(false);
       }
     };
+
     checkUser();
     loadPosts();
   }, []);
 
+  useEffect(() => {
+    if (!posts.length) return;
+    setLikeCounts(prev => {
+      let modified = false;
+      const next = { ...prev };
+      posts.forEach(post => {
+        if (next[post.id] === undefined) {
+          next[post.id] = post.likes;
+          modified = true;
+        }
+      });
+      return modified ? next : prev;
+    });
+  }, [posts]);
+
   const loadPosts = async () => {
     setLoading(true);
     try {
-      const data = getBlogPosts();
+      const response = await fetch("/api/blogs");
+      if (!response.ok) {
+        throw new Error(`Failed to load blogs: ${response.status}`);
+      }
+      const data: BlogPost[] = await response.json();
       setPosts(data);
     } catch (error) {
       console.error("Error loading blog posts:", error);
@@ -37,6 +60,84 @@ export default function BlogPage() {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  };
+
+  const formatCommentDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  };
+
+  const handleLike = async (postId: string) => {
+    try {
+      const response = await fetch(`/api/blogs/${postId}/like`, {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to like post: ${response.status}`);
+      }
+
+      const data: { likes: number; warning?: string } = await response.json();
+      setLikeCounts(prev => ({
+        ...prev,
+        [postId]: data.likes,
+      }));
+
+      if (data.warning) {
+        setShareFeedback(prev => ({ ...prev, [postId]: data.warning }));
+        setTimeout(() => {
+          setShareFeedback(prev => {
+            if (!(postId in prev)) return prev;
+            const next = { ...prev };
+            delete next[postId];
+            return next;
+          });
+        }, 3000);
+      }
+    } catch (error) {
+      console.error("Error liking post:", error);
+      setLikeCounts(prev => ({
+        ...prev,
+        [postId]: (prev[postId] ?? 0) + 1,
+      }));
+      setShareFeedback(prev => ({ ...prev, [postId]: "Saved locally" }));
+      setTimeout(() => {
+        setShareFeedback(prev => {
+          if (!(postId in prev)) return prev;
+          const next = { ...prev };
+          delete next[postId];
+          return next;
+        });
+      }, 3000);
+    }
+  };
+  const handleShare = async (post: BlogPost) => {
+    if (typeof window === "undefined") return;
+    const postUrl = `${window.location.origin}/blog/${post.slug}`;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: post.title, url: postUrl });
+        setShareFeedback(prev => ({ ...prev, [post.id]: "Shared!" }));
+      } else if (navigator.clipboard) {
+        await navigator.clipboard.writeText(postUrl);
+        setShareFeedback(prev => ({ ...prev, [post.id]: "Link copied" }));
+      } else {
+        setShareFeedback(prev => ({ ...prev, [post.id]: "Copy link manually" }));
+      }
+    } catch (error) {
+      console.error("Error sharing post:", error);
+      setShareFeedback(prev => ({ ...prev, [post.id]: "Share failed" }));
+    }
+
+    setTimeout(() => {
+      setShareFeedback(prev => {
+        if (!(post.id in prev)) return prev;
+        const next = { ...prev };
+        delete next[post.id];
+        return next;
+      });
+    }, 3000);
   };
 
   return (
@@ -113,6 +214,59 @@ export default function BlogPage() {
                           <span className="flex items-center gap-2 font-medium text-teal-600 opacity-0 group-hover:opacity-100 transition-opacity">
                             Read More →
                           </span>
+                        </div>
+                        <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handleLike(post.id);
+                            }}
+                            className="inline-flex items-center gap-2 text-slate-700 hover:text-teal-600 font-medium transition-colors"
+                          >
+                            <Heart className="w-4 h-4" />
+                            <span>{likeCounts[post.id] ?? post.likes}</span>
+                          </button>
+                          <div className="flex items-center gap-2 text-slate-500 font-medium">
+                            <MessageCircle className="w-4 h-4" />
+                            <span>{post.comments.length}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                handleShare(post);
+                              }}
+                              className="inline-flex items-center gap-2 text-slate-700 hover:text-teal-600 font-medium transition-colors"
+                            >
+                              <Share2 className="w-4 h-4" />
+                              <span>Share</span>
+                            </button>
+                            {shareFeedback[post.id] && (
+                              <span className="text-xs text-teal-600" aria-live="polite">
+                                {shareFeedback[post.id]}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="mt-6 space-y-4">
+                          <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                            <MessageCircle className="w-4 h-4 text-teal-600" />
+                            <span>Comments</span>
+                            <span className="text-xs font-medium text-slate-500">({post.comments.length})</span>
+                          </h3>
+                          <div className="space-y-3">
+                            {post.comments.map(comment => (
+                              <div key={comment.id} className="bg-slate-50 border border-slate-100 rounded-lg p-4">
+                                <div className="flex items-center justify-between text-xs text-slate-500">
+                                  <span className="font-semibold text-slate-900 text-sm">{comment.author}</span>
+                                  <span>{formatCommentDate(comment.date)}</span>
+                                </div>
+                                <p className="text-gray-600 mt-2 text-sm leading-relaxed">{comment.message}</p>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     </div>

@@ -11,17 +11,9 @@ A modern, feature-rich portfolio website built with Next.js 15, showcasing AI/ML
 ## ✨ Features
 
 ### 🎨 Visual Effects & Animations
+### 🎨 Visual Effects & Animations
 - **3D Particle System** - Interactive floating particles using Three.js
-- **Custom Cursor Trail** - Animated cursor with ring effect that responds to interactions
 - **Scroll-Triggered Animations** - Smooth reveal animations using Intersection Observer
-- **Gradient Backgrounds** - Dynamic animated mesh gradients
-- **3D Card Hover Effects** - Mouse-tracking parallax on project cards
-- **Shimmer Effects** - Subtle shine animations on interactive elements
-- **Magnetic Buttons** - Interactive hover states with smooth transitions
-
-### 📱 Core Sections
-- **Hero Section** - Eye-catching introduction with animated profile and 3D background
-- **About Section** - Personal bio with animated skill bars and interactive info cards
 - **Projects Section** - Showcase of ML/AI projects with filtering and 3D effects
 - **Education Section** - Academic background and achievements
 - **Experience Section** - Professional experience timeline
@@ -42,6 +34,7 @@ A modern, feature-rich portfolio website built with Next.js 15, showcasing AI/ML
 - **TypeScript** - Full type safety
 - **Dynamic Imports** - Code splitting for optimal performance
 - **Form Handling** - Contact form with email integration (Resend/Nodemailer)
+- **Supabase-backed Blog** - Like counts and comments persisted via Supabase Postgres
 - **Error Tracking** - Sentry integration for monitoring
 - **SEO Optimized** - Meta tags and semantic HTML
 
@@ -68,17 +61,23 @@ A modern, feature-rich portfolio website built with Next.js 15, showcasing AI/ML
 
 3. **Set up environment variables**
    
-   Create a `.env.local` file in the root directory:
-   ```env
-   # Email Configuration (choose one)
-   RESEND_API_KEY=your_resend_api_key
-   # OR
-   EMAIL_USER=your_email@gmail.com
-   EMAIL_PASS=your_app_password
-   
-   # Sentry (Optional)
-   SENTRY_DSN=your_sentry_dsn
-   ```
+  Create a `.env.local` file in the root directory:
+  ```env
+  # Email Configuration (choose one)
+  RESEND_API_KEY=your_resend_api_key
+  # OR
+  EMAIL_USER=your_email@gmail.com
+  EMAIL_PASS=your_app_password
+
+  # Supabase (Required in production)
+  NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+  NEXT_PUBLIC_SUPABASE_ANON_KEY=your_public_anon_key
+  SUPABASE_URL=https://your-project.supabase.co
+  SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+
+  # Sentry (Optional)
+  SENTRY_DSN=your_sentry_dsn
+  ```
 
 4. **Run development server**
    ```bash
@@ -106,6 +105,10 @@ my-portfolio/
 ├── src/
 │   ├── app/
 │   │   ├── api/
+│   │   │   ├── blogs/
+│   │   │   │   └── route.ts   # Supabase blog listing API
+│   │   │   ├── blogs/[id]/like/
+│   │   │   │   └── route.ts   # Supabase like endpoint
 │   │   │   └── contact/
 │   │   │       └── route.ts   # Contact form API
 │   │   ├── blog/
@@ -118,7 +121,6 @@ my-portfolio/
 │   │   ├── effects/
 │   │   │   ├── AnimatedBackground.tsx  # Gradient backgrounds
 │   │   │   ├── BackToTop.tsx           # Back to top button
-│   │   │   ├── CursorTrail.tsx         # Custom cursor
 │   │   │   ├── FloatingParticles.tsx   # 3D particles
 │   │   │   ├── LoadingSpinner.tsx      # Loading animation
 │   │   │   ├── ScrollReveal.tsx        # Scroll animations
@@ -139,7 +141,9 @@ my-portfolio/
 │   │   ├── projects.json      # Projects data
 │   │   └── user.json          # User profile data
 │   └── lib/
-│       └── data.ts            # Data fetching utilities
+│       ├── data.ts            # Static data helpers & types
+│       ├── supabaseClient.ts  # Browser Supabase client
+│       └── supabaseServer.ts  # Server-side Supabase client
 ├── .env.local                 # Environment variables
 ├── eslint.config.mjs          # ESLint configuration
 ├── next.config.ts             # Next.js configuration
@@ -269,6 +273,51 @@ const particleCount = 2000; // Adjust this number
    EMAIL_USER=your.email@gmail.com
    EMAIL_PASS=your_app_password
    ```
+
+## 🗄️ Supabase Setup
+
+1. **Create a Supabase project** at [supabase.com](https://supabase.com) and copy the Project URL and keys from _Project Settings → API_.
+2. **Create the tables** using the SQL editor:
+   ```sql
+   create table if not exists public.blogs (
+     id uuid primary key default gen_random_uuid(),
+     title text not null,
+     slug text unique not null,
+     content text,
+     excerpt text,
+     cover_image_url text,
+     tags text[] default '{}',
+     status text default 'draft',
+     featured boolean default false,
+     created_date timestamptz default now(),
+     likes integer default 0
+   );
+
+   create table if not exists public.blog_comments (
+     id uuid primary key default gen_random_uuid(),
+     blog_id uuid references public.blogs(id) on delete cascade,
+     author text not null,
+     message text not null,
+     created_at timestamptz default now()
+   );
+
+   create index if not exists blog_comments_blog_id_idx on public.blog_comments(blog_id);
+   ```
+3. **Enable Row Level Security** for both tables and add policies:
+   ```sql
+   alter table public.blogs enable row level security;
+   alter table public.blog_comments enable row level security;
+
+   create policy "Public read blogs" on public.blogs
+     for select using (true);
+
+   create policy "Public read blog comments" on public.blog_comments
+     for select using (true);
+   ```
+   Likes are incremented through the service role key, so no additional policy is required for updates.
+4. **Seed your data** (optional) by importing the existing `src/data/blogs.json` content into the `blogs` table and adding matching rows in `blog_comments`.
+5. **Configure environment variables** (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`) in both `.env.local` and your Vercel project settings. Keep the service role key server-side only—never expose it in client bundles.
+6. **Deploy** – the API routes will fall back to the JSON files locally if Supabase variables are absent, but production deployments should provide them for persistence.
 
 ## 🎭 Animation System
 

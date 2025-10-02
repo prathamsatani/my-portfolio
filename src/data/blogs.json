@@ -9,7 +9,22 @@
     "tags": ["AI", "Deep Learning", "NLP", "Transformers"],
     "status": "published",
     "featured": true,
-    "created_date": "2024-09-15T10:00:00Z"
+    "created_date": "2024-09-15T10:00:00Z",
+    "likes": 128,
+    "comments": [
+      {
+        "id": "c1",
+        "author": "Aisha Patel",
+        "message": "Loved the breakdown of multi-head attention—super clear!",
+        "date": "2024-09-18T09:30:00Z"
+      },
+      {
+        "id": "c2",
+        "author": "Liam Chen",
+        "message": "Would be great to see an example implementation in PyTorch too.",
+        "date": "2024-09-19T15:45:00Z"
+      }
+    ]
   },
   {
     "id": "2",
@@ -21,7 +36,22 @@
     "tags": ["MLOps", "Machine Learning", "Python", "Production"],
     "status": "published",
     "featured": true,
-    "created_date": "2024-09-01T14:30:00Z"
+    "created_date": "2024-09-01T14:30:00Z",
+    "likes": 96,
+    "comments": [
+      {
+        "id": "c1",
+        "author": "Sophia Martinez",
+        "message": "The monitoring checklist is exactly what I needed—thank you!",
+        "date": "2024-09-03T11:20:00Z"
+      },
+      {
+        "id": "c2",
+        "author": "Noah Johnson",
+        "message": "Curious how you manage model rollback strategies in production?",
+        "date": "2024-09-05T18:05:00Z"
+      }
+    ]
   },
   {
     "id": "3",
@@ -33,6 +63,21 @@
     "tags": ["Computer Vision", "Deep Learning", "CNN", "Vision Transformers"],
     "status": "published",
     "featured": false,
-    "created_date": "2024-08-20T09:15:00Z"
+    "created_date": "2024-08-20T09:15:00Z",
+    "likes": 74,
+    "comments": [
+      {
+        "id": "c1",
+        "author": "Maya Singh",
+        "message": "Appreciate the comparison table between CNNs and ViTs!",
+        "date": "2024-08-22T13:10:00Z"
+      },
+      {
+        "id": "c2",
+        "author": "Ethan Wright",
+        "message": "Would you recommend ViTs for small-scale datasets as well?",
+        "date": "2024-08-23T07:55:00Z"
+      }
+    ]
   }
 ]
