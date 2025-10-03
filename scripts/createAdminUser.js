@@ -30,7 +30,7 @@ function loadEnvFile() {
   
   if (!fs.existsSync(envPath)) {
     console.error('❌ Error: .env.local file not found!');
-    console.error('   Make sure you have a .env.local file with NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY');
+    console.error('   Make sure you have a .env.local file with NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY');
     process.exit(1);
   }
 
@@ -57,11 +57,11 @@ async function createAdminUser() {
   // Load environment variables
   const env = loadEnvFile();
   const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceRoleKey = env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY;
+  const serviceRoleKey = env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !serviceRoleKey) {
     console.error('❌ Error: Missing Supabase configuration!');
-    console.error('   Make sure NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY are set in .env.local');
+    console.error('   Make sure NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are set in .env.local');
     process.exit(1);
   }
 
