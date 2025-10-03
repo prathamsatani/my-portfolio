@@ -19,6 +19,7 @@ import {
   ListCard,
   Alert,
 } from "@/components/admin/AdminUIComponents";
+import { ImageUpload, uploadFileToSupabase } from "@/components/admin/FileUpload";
 
 interface ProjectFormState {
   id?: string;
@@ -56,6 +57,10 @@ export default function ProjectsPage() {
   const [projectForm, setProjectForm] = useState<ProjectFormState>(emptyProjectForm);
   const [projectMessage, setProjectMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  
+  // Store pending file
+  const [pendingProjectImage, setPendingProjectImage] = useState<File | null>(null);
 
   const loadData = async () => {
     try {
@@ -74,27 +79,39 @@ export default function ProjectsPage() {
 
   const resetProjectForm = () => {
     setProjectForm(emptyProjectForm);
+    setPendingProjectImage(null);
   };
 
   const handleProjectSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setProjectMessage(null);
-
-    const payload = {
-      title: projectForm.title,
-      description: projectForm.description,
-      technologies: projectForm.technologies
-        .split(",")
-        .map((tech) => tech.trim())
-        .filter(Boolean),
-      github_url: projectForm.github_url,
-      demo_url: projectForm.demo_url,
-      image_url: projectForm.image_url,
-      category: projectForm.category,
-      featured: projectForm.featured,
-    };
+    setIsSaving(true);
 
     try {
+      let imageUrl = projectForm.image_url;
+
+      // Upload pending file first if exists
+      if (pendingProjectImage) {
+        setProjectMessage("Uploading project image...");
+        imageUrl = await uploadFileToSupabase(pendingProjectImage, "images/projects");
+        setPendingProjectImage(null);
+      }
+
+      const payload = {
+        title: projectForm.title,
+        description: projectForm.description,
+        technologies: projectForm.technologies
+          .split(",")
+          .map((tech) => tech.trim())
+          .filter(Boolean),
+        github_url: projectForm.github_url,
+        demo_url: projectForm.demo_url,
+        image_url: imageUrl,
+        category: projectForm.category,
+        featured: projectForm.featured,
+      };
+
+      setProjectMessage("Saving project...");
       const response = await fetch(
         projectForm.id ? `/api/admin/projects/${projectForm.id}` : "/api/admin/projects",
         {
@@ -109,12 +126,14 @@ export default function ProjectsPage() {
         throw new Error(data.error ?? "Failed to save project");
       }
 
-      setProjectMessage(projectForm.id ? "Project updated" : "Project created");
+      setProjectMessage(projectForm.id ? "Project updated successfully!" : "Project created successfully!");
       resetProjectForm();
       await loadData();
     } catch (error) {
       console.error(error);
       setProjectMessage(error instanceof Error ? error.message : "Failed to save project");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -182,6 +201,28 @@ export default function ProjectsPage() {
 
         <div className="rounded-2xl border-2 border-slate-200 bg-white/80 backdrop-blur-sm p-6 shadow-lg mb-6">
           <form onSubmit={handleProjectSubmit} className="space-y-6">
+            {/* Project Image at Top */}
+            <div className="mb-8">
+              <ImageUpload
+                label="Project Image"
+                currentFile={projectForm.image_url}
+                onFileSelect={(fileOrUrl) => {
+                  if (fileOrUrl instanceof File) {
+                    setPendingProjectImage(fileOrUrl);
+                  } else {
+                    setProjectForm((prev) => ({ ...prev, image_url: fileOrUrl }));
+                  }
+                }}
+                onFileRemove={() => {
+                  setPendingProjectImage(null);
+                  setProjectForm((prev) => ({ ...prev, image_url: "" }));
+                }}
+                directory="images/projects"
+                description="Upload a project screenshot or thumbnail (recommended: 800x600px)"
+                maxSize={10}
+              />
+            </div>
+
             <div className="grid gap-4 md:grid-cols-2">
               <Input
                 label="Title"
@@ -217,7 +258,8 @@ export default function ProjectsPage() {
               onChange={(value) => setProjectForm((prev) => ({ ...prev, technologies: value }))}
               placeholder="Comma separated (e.g. Next.js, Supabase, Tailwind)"
             />
-            <div className="grid gap-4 md:grid-cols-3">
+            
+            <div className="grid gap-4 md:grid-cols-2">
               <Input
                 label="GitHub URL"
                 value={projectForm.github_url}
@@ -230,13 +272,8 @@ export default function ProjectsPage() {
                 onChange={(value) => setProjectForm((prev) => ({ ...prev, demo_url: value }))}
                 placeholder="https://project-demo.com"
               />
-              <Input
-                label="Image URL"
-                value={projectForm.image_url}
-                onChange={(value) => setProjectForm((prev) => ({ ...prev, image_url: value }))}
-                placeholder="https://cdn.com/project.png"
-              />
             </div>
+            
             <Checkbox
               label="Featured"
               checked={projectForm.featured}
@@ -244,17 +281,39 @@ export default function ProjectsPage() {
                 setProjectForm((prev) => ({ ...prev, featured: checked }))
               }
             />
+
+            {/* Optional: Manual URL Entry */}
+            <details className="group">
+              <summary className="cursor-pointer text-sm font-medium text-slate-600 hover:text-slate-900 list-none flex items-center gap-2">
+                <span className="text-slate-400 group-open:rotate-90 transition-transform">▶</span>
+                Advanced: Manual Image URL
+              </summary>
+              <div className="mt-2 pl-6 border-l-2 border-teal-200 bg-slate-50/50 rounded-r-xl p-4">
+                <Input
+                  label="Image URL"
+                  value={projectForm.image_url}
+                  onChange={(value) => setProjectForm((prev) => ({ ...prev, image_url: value }))}
+                  placeholder="https://cdn.com/project.png"
+                />
+              </div>
+            </details>
             <div className="flex flex-wrap gap-3">
-              <Button type="submit" icon={<Save className="h-4 w-4" />}>
-                {projectForm.id ? "Update Project" : "Create Project"}
-              </Button>
-              <SecondaryButton
-                type="button"
-                icon={<RefreshCcw className="h-4 w-4" />}
-                onClick={resetProjectForm}
+              <Button 
+                type="submit" 
+                icon={<Save className="h-4 w-4" />}
+                disabled={isSaving}
               >
-                Reset
-              </SecondaryButton>
+                {isSaving ? "Saving..." : projectForm.id ? "Update Project" : "Create Project"}
+              </Button>
+              {!isSaving && (
+                <SecondaryButton
+                  type="button"
+                  icon={<RefreshCcw className="h-4 w-4" />}
+                  onClick={resetProjectForm}
+                >
+                  Reset
+                </SecondaryButton>
+              )}
             </div>
           </form>
         </div>

@@ -76,10 +76,10 @@ values
     'AI & Machine Learning Graduate Student',
     'Graduate Student',
     'Boston, MA',
-    '/pratham.jpg',
+    'https://hiygyuesmewgnxbcdbdm.supabase.co/storage/v1/object/public/public/images/profiles/pratham.jpg',
     'https://github.com/prathamsatani',
     'https://linkedin.com/in/prathamsatani',
-    '/Pratham Satani.pdf'
+    'https://hiygyuesmewgnxbcdbdm.supabase.co/storage/v1/object/public/public/documents/resumes/Pratham-Satani.pdf'
   )
 on conflict (id) do update
 set

@@ -9,10 +9,10 @@ const profileSchema = z.object({
   bio: z.string().max(2000).optional(),
   title: z.string().max(120).optional(),
   location: z.string().max(120).optional(),
-  profile_image_url: z.string().url().optional().or(z.literal("")),
-  github_url: z.string().url().optional().or(z.literal("")),
-  linkedin_url: z.string().url().optional().or(z.literal("")),
-  resume_url: z.string().url().optional().or(z.literal("")),
+  profile_image_url: z.string().url().optional().or(z.literal("")).nullable(),
+  github_url: z.string().url().optional().or(z.literal("")).nullable(),
+  linkedin_url: z.string().url().optional().or(z.literal("")).nullable(),
+  resume_url: z.string().url().optional().or(z.literal("")).nullable(),
 });
 
 export async function PATCH(request: NextRequest) {
@@ -25,7 +25,9 @@ export async function PATCH(request: NextRequest) {
   const parsed = profileSchema.safeParse(json);
 
   if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+    console.error("Profile validation failed:", parsed.error);
+    const errorMessage = parsed.error.issues.map(issue => `${issue.path.join('.')}: ${issue.message}`).join(', ');
+    return NextResponse.json({ error: errorMessage }, { status: 400 });
   }
 
   const payload = parsed.data;

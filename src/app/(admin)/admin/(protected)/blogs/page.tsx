@@ -19,6 +19,7 @@ import {
   ListCard,
   Alert,
 } from "@/components/admin/AdminUIComponents";
+import { ImageUpload, uploadFileToSupabase } from "@/components/admin/FileUpload";
 
 interface BlogFormState {
   id?: string;
@@ -56,6 +57,10 @@ export default function BlogsPage() {
   const [blogForm, setBlogForm] = useState<BlogFormState>(emptyBlogForm);
   const [blogMessage, setBlogMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  
+  // Store pending file
+  const [pendingCoverImage, setPendingCoverImage] = useState<File | null>(null);
 
   const loadData = async () => {
     try {
@@ -74,6 +79,7 @@ export default function BlogsPage() {
 
   const resetBlogForm = () => {
     setBlogForm(emptyBlogForm);
+    setPendingCoverImage(null);
   };
 
   const convertTagsToString = (tags?: string[]) => (tags ?? []).join(", ");
@@ -81,22 +87,33 @@ export default function BlogsPage() {
   const handleBlogSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setBlogMessage(null);
-
-    const payload = {
-      title: blogForm.title,
-      slug: blogForm.slug,
-      excerpt: blogForm.excerpt,
-      content: blogForm.content,
-      cover_image_url: blogForm.cover_image_url,
-      tags: blogForm.tags
-        .split(",")
-        .map((tag) => tag.trim())
-        .filter(Boolean),
-      status: blogForm.status,
-      featured: blogForm.featured,
-    };
+    setIsSaving(true);
 
     try {
+      let coverImageUrl = blogForm.cover_image_url;
+
+      // Upload pending file first if exists
+      if (pendingCoverImage) {
+        setBlogMessage("Uploading cover image...");
+        coverImageUrl = await uploadFileToSupabase(pendingCoverImage, "images/blogs");
+        setPendingCoverImage(null);
+      }
+
+      const payload = {
+        title: blogForm.title,
+        slug: blogForm.slug,
+        excerpt: blogForm.excerpt,
+        content: blogForm.content,
+        cover_image_url: coverImageUrl,
+        tags: blogForm.tags
+          .split(",")
+          .map((tag) => tag.trim())
+          .filter(Boolean),
+        status: blogForm.status,
+        featured: blogForm.featured,
+      };
+
+      setBlogMessage("Saving blog post...");
       const response = await fetch(
         blogForm.id ? `/api/admin/blogs/${blogForm.id}` : "/api/admin/blogs",
         {
@@ -111,12 +128,14 @@ export default function BlogsPage() {
         throw new Error(data.error ?? "Failed to save blog");
       }
 
-      setBlogMessage(blogForm.id ? "Blog updated" : "Blog created");
+      setBlogMessage(blogForm.id ? "Blog updated successfully!" : "Blog created successfully!");
       resetBlogForm();
       await loadData();
     } catch (error) {
       console.error(error);
       setBlogMessage(error instanceof Error ? error.message : "Failed to save blog");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -185,6 +204,28 @@ export default function BlogsPage() {
 
         <div className="rounded-2xl border-2 border-slate-200 bg-white/80 backdrop-blur-sm p-6 shadow-lg mb-6">
           <form onSubmit={handleBlogSubmit} className="space-y-6">
+            {/* Cover Image at Top */}
+            <div className="mb-8">
+              <ImageUpload
+                label="Cover Image"
+                currentFile={blogForm.cover_image_url}
+                onFileSelect={(fileOrUrl) => {
+                  if (fileOrUrl instanceof File) {
+                    setPendingCoverImage(fileOrUrl);
+                  } else {
+                    setBlogForm((prev) => ({ ...prev, cover_image_url: fileOrUrl }));
+                  }
+                }}
+                onFileRemove={() => {
+                  setPendingCoverImage(null);
+                  setBlogForm((prev) => ({ ...prev, cover_image_url: "" }));
+                }}
+                directory="images/blogs"
+                description="Upload a cover image for your blog post (recommended: 1200x630px)"
+                maxSize={10}
+              />
+            </div>
+
             <div className="grid gap-4 md:grid-cols-2">
               <Input
                 label="Title"
@@ -213,12 +254,6 @@ export default function BlogsPage() {
               rows={8}
             />
             <Input
-              label="Cover Image URL"
-              value={blogForm.cover_image_url}
-              onChange={(value) => setBlogForm((prev) => ({ ...prev, cover_image_url: value }))}
-              placeholder="https://example.com/cover.jpg"
-            />
-            <Input
               label="Tags"
               value={blogForm.tags}
               onChange={(value) => setBlogForm((prev) => ({ ...prev, tags: value }))}
@@ -244,17 +279,40 @@ export default function BlogsPage() {
                 }
               />
             </div>
+
+            {/* Optional: Manual URL Entry */}
+            <details className="group">
+              <summary className="cursor-pointer text-sm font-medium text-slate-600 hover:text-slate-900 list-none flex items-center gap-2">
+                <span className="text-slate-400 group-open:rotate-90 transition-transform">▶</span>
+                Advanced: Manual Cover Image URL
+              </summary>
+              <div className="mt-2 pl-6 border-l-2 border-teal-200 bg-slate-50/50 rounded-r-xl p-4">
+                <Input
+                  label="Cover Image URL"
+                  value={blogForm.cover_image_url}
+                  onChange={(value) => setBlogForm((prev) => ({ ...prev, cover_image_url: value }))}
+                  placeholder="https://example.com/cover.jpg"
+                />
+              </div>
+            </details>
+
             <div className="flex flex-wrap gap-3">
-              <Button type="submit" icon={<Save className="h-4 w-4" />}>
-                {blogForm.id ? "Update Blog" : "Create Blog"}
-              </Button>
-              <SecondaryButton
-                type="button"
-                icon={<RefreshCcw className="h-4 w-4" />}
-                onClick={resetBlogForm}
+              <Button 
+                type="submit" 
+                icon={<Save className="h-4 w-4" />}
+                disabled={isSaving}
               >
-                Reset
-              </SecondaryButton>
+                {isSaving ? "Saving..." : blogForm.id ? "Update Blog" : "Create Blog"}
+              </Button>
+              {!isSaving && (
+                <SecondaryButton
+                  type="button"
+                  icon={<RefreshCcw className="h-4 w-4" />}
+                  onClick={resetBlogForm}
+                >
+                  Reset
+                </SecondaryButton>
+              )}
             </div>
           </form>
         </div>

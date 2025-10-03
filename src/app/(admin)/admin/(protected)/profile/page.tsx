@@ -17,6 +17,7 @@ import {
   SecondaryButton,
   Alert,
 } from "@/components/admin/AdminUIComponents";
+import { ImageUpload, DocumentUpload, uploadFileToSupabase } from "@/components/admin/FileUpload";
 
 const defaultProfileState: UserData = {
   full_name: "",
@@ -43,6 +44,11 @@ export default function ProfilePage() {
   const [profileForm, setProfileForm] = useState<UserData>(defaultProfileState);
   const [profileMessage, setProfileMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  
+  // Store pending files
+  const [pendingProfileImage, setPendingProfileImage] = useState<File | null>(null);
+  const [pendingResume, setPendingResume] = useState<File | null>(null);
 
   const loadData = async () => {
     try {
@@ -63,12 +69,32 @@ export default function ProfilePage() {
   const handleProfileSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setProfileMessage(null);
+    setIsSaving(true);
 
     try {
+      // Create a copy of the form data to modify
+      const dataToSave = { ...profileForm };
+
+      // Upload pending files first
+      if (pendingProfileImage) {
+        setProfileMessage("Uploading profile image...");
+        const url = await uploadFileToSupabase(pendingProfileImage, "images/profiles");
+        dataToSave.profile_image_url = url;
+        setPendingProfileImage(null);
+      }
+
+      if (pendingResume) {
+        setProfileMessage("Uploading resume...");
+        const url = await uploadFileToSupabase(pendingResume, "documents/resumes");
+        dataToSave.resume_url = url;
+        setPendingResume(null);
+      }
+
+      setProfileMessage("Saving profile...");
       const response = await fetch("/api/admin/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(profileForm),
+        body: JSON.stringify(dataToSave),
       });
 
       if (!response.ok) {
@@ -76,11 +102,13 @@ export default function ProfilePage() {
         throw new Error(data.error ?? "Failed to update profile");
       }
 
-      setProfileMessage("Profile updated");
+      setProfileMessage("Profile updated successfully!");
       await loadData();
     } catch (error) {
       console.error(error);
       setProfileMessage(error instanceof Error ? error.message : "Failed to update profile");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -119,6 +147,30 @@ export default function ProfilePage() {
 
         <div className="rounded-2xl border-2 border-slate-200 bg-white/80 backdrop-blur-sm p-6 shadow-lg">
           <form onSubmit={handleProfileSubmit} className="space-y-6">
+            {/* Profile Image at Top Center */}
+            <div className="flex justify-center mb-8">
+              <div className="w-full max-w-md">
+                <ImageUpload
+                  label="Profile Image"
+                  currentFile={profileForm.profile_image_url ?? ""}
+                  onFileSelect={(fileOrUrl) => {
+                    if (fileOrUrl instanceof File) {
+                      setPendingProfileImage(fileOrUrl);
+                    } else {
+                      setProfileForm((prev) => ({ ...prev, profile_image_url: fileOrUrl }));
+                    }
+                  }}
+                  onFileRemove={() => {
+                    setPendingProfileImage(null);
+                    setProfileForm((prev) => ({ ...prev, profile_image_url: "" }));
+                  }}
+                  directory="images/profiles"
+                  description="Upload your profile picture (JPG, PNG, or WebP)"
+                  maxSize={10}
+                />
+              </div>
+            </div>
+
             <div className="grid gap-4 md:grid-cols-2">
               <Input
                 label="Full name"
@@ -149,20 +201,52 @@ export default function ProfilePage() {
               value={profileForm.bio ?? ""}
               onChange={(value) => setProfileForm((prev) => ({ ...prev, bio: value }))}
             />
-            <div className="grid gap-4 md:grid-cols-2">
-              <Input
-                label="Profile image URL"
-                value={profileForm.profile_image_url ?? ""}
-                onChange={(value) =>
-                  setProfileForm((prev) => ({ ...prev, profile_image_url: value }))
-                }
-              />
-              <Input
-                label="Resume URL"
-                value={profileForm.resume_url ?? ""}
-                onChange={(value) => setProfileForm((prev) => ({ ...prev, resume_url: value }))}
+            
+            {/* Resume Upload */}
+            <div className="max-w-md">
+              <DocumentUpload
+                label="Resume"
+                currentFile={profileForm.resume_url ?? ""}
+                onFileSelect={(fileOrUrl) => {
+                  if (fileOrUrl instanceof File) {
+                    setPendingResume(fileOrUrl);
+                  } else {
+                    setProfileForm((prev) => ({ ...prev, resume_url: fileOrUrl }));
+                  }
+                }}
+                onFileRemove={() => {
+                  setPendingResume(null);
+                  setProfileForm((prev) => ({ ...prev, resume_url: "" }));
+                }}
+                directory="documents/resumes"
+                description="Upload your resume (PDF format)"
+                maxSize={10}
               />
             </div>
+
+            {/* Optional: Manual URL Entry */}
+            <details className="group">
+              <summary className="cursor-pointer text-sm font-medium text-slate-600 hover:text-slate-900 mb-2 list-none flex items-center gap-2">
+                <span className="text-slate-400 group-open:rotate-90 transition-transform">▶</span>
+                Advanced: Manual URL Entry
+              </summary>
+              <div className="grid gap-4 md:grid-cols-2 mt-4 pl-6 border-l-2 border-teal-200 bg-slate-50/50 rounded-r-xl p-4">
+                <Input
+                  label="Profile image URL"
+                  value={profileForm.profile_image_url ?? ""}
+                  onChange={(value) =>
+                    setProfileForm((prev) => ({ ...prev, profile_image_url: value }))
+                  }
+                  placeholder="https://..."
+                />
+                <Input
+                  label="Resume URL"
+                  value={profileForm.resume_url ?? ""}
+                  onChange={(value) => setProfileForm((prev) => ({ ...prev, resume_url: value }))}
+                  placeholder="https://..."
+                />
+              </div>
+            </details>
             <div className="grid gap-4 md:grid-cols-2">
               <Input
                 label="GitHub URL"
@@ -176,14 +260,26 @@ export default function ProfilePage() {
               />
             </div>
             <div className="flex flex-wrap gap-3">
-              <Button type="submit" icon={<Save className="h-4 w-4" />}>Save profile</Button>
-              <SecondaryButton
-                type="button"
-                icon={<RefreshCcw className="h-4 w-4" />}
-                onClick={() => setProfileForm(profile ?? defaultProfileState)}
+              <Button 
+                type="submit" 
+                icon={<Save className="h-4 w-4" />}
+                disabled={isSaving}
               >
-                Reset
-              </SecondaryButton>
+                {isSaving ? "Saving..." : "Save profile"}
+              </Button>
+              {!isSaving && (
+                <SecondaryButton
+                  type="button"
+                  icon={<RefreshCcw className="h-4 w-4" />}
+                  onClick={() => {
+                    setProfileForm(profile ?? defaultProfileState);
+                    setPendingProfileImage(null);
+                    setPendingResume(null);
+                  }}
+                >
+                  Reset
+                </SecondaryButton>
+              )}
             </div>
           </form>
         </div>
