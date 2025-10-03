@@ -6,8 +6,8 @@ import Navigation from "@/components/Navigation";
 export default function ConditionalNavigation() {
   const pathname = usePathname();
   
-  // Hide navigation on admin pages (except login)
-  const isAdminPage = pathname?.startsWith("/admin") && pathname !== "/admin/login";
+  // Hide navigation on ALL admin pages (including login)
+  const isAdminPage = pathname?.startsWith("/admin");
   
   if (isAdminPage) {
     return null;
