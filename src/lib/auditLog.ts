@@ -36,7 +36,7 @@ export async function logAdminAction(
   resourceType: ResourceType,
   resourceId: string | null,
   request: NextRequest,
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 ) {
   try {
     const supabase = getSupabaseServiceRoleClient();

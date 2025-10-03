@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useRef, ChangeEvent, useEffect } from "react";
-import { Upload, X, File, Image as ImageIcon, Loader2 } from "lucide-react";
+import Image from "next/image";
+import { X, File, Image as ImageIcon, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface FileUploadProps {
@@ -47,15 +48,13 @@ export function FileUpload({
   currentFile,
   onFileSelect,
   onFileRemove,
-  directory = "misc",
   type = "image",
   description,
   className = "",
 }: FileUploadProps) {
-  const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(currentFile || null);
   const [error, setError] = useState<string | null>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Update preview when currentFile changes
@@ -76,9 +75,6 @@ export function FileUpload({
       return;
     }
 
-    // Store the file for later upload
-    setSelectedFile(file);
-
     // Show preview for images
     if (type === "image" && file.type.startsWith("image/")) {
       const reader = new FileReader();
@@ -91,7 +87,7 @@ export function FileUpload({
     }
 
     // Pass the file to parent (not the URL yet)
-    onFileSelect(file as any);
+    onFileSelect(file);
   };
 
   const handleRemove = async () => {
@@ -133,10 +129,12 @@ export function FileUpload({
             >
               {type === "image" && (preview.startsWith("http") || preview.startsWith("data:")) ? (
                 <div className="relative w-full h-64 bg-slate-50">
-                  <img
+                  <Image
                     src={preview}
                     alt="Preview"
-                    className="w-full h-full object-contain"
+                    fill
+                    className="object-contain"
+                    unoptimized={preview.startsWith("data:")}
                   />
                 </div>
               ) : (

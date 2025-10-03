@@ -1,15 +1,21 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
+import rehypeSanitize from "rehype-sanitize";
+import rehypeHighlight from "rehype-highlight";
 import type { BlogPost } from "@/lib/data";
 import { Heart, MessageCircle, Share2, ArrowLeft, Calendar, Clock } from "lucide-react";
+import "highlight.js/styles/github-dark.css";
+import "./markdown.css";
 
 export default function BlogDetailPage() {
   const params = useParams();
-  const router = useRouter();
   const slug = params.slug as string;
 
   const [post, setPost] = useState<BlogPost | null>(null);
@@ -23,7 +29,27 @@ export default function BlogDetailPage() {
   const [shareFeedback, setShareFeedback] = useState("");
 
   useEffect(() => {
-    loadPost();
+    (async () => {
+      try {
+        setLoading(true);
+        setNotFound(false);
+
+        const res = await fetch(`/api/blogs/${slug}`);
+        if (!res.ok) {
+          setNotFound(true);
+          setLoading(false);
+          return;
+        }
+
+        const data = await res.json();
+        setPost(data);
+      } catch (error) {
+        console.error("Failed to load blog post:", error);
+        setNotFound(true);
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, [slug]);
 
   useEffect(() => {
@@ -42,30 +68,6 @@ export default function BlogDetailPage() {
       }
     }
   }, [post]);
-
-  const loadPost = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch("/api/blogs");
-      if (!response.ok) {
-        throw new Error("Failed to load blogs");
-      }
-      const posts: BlogPost[] = await response.json();
-      const foundPost = posts.find((p) => p.slug === slug);
-      
-      if (foundPost) {
-        setPost(foundPost);
-        setNotFound(false);
-      } else {
-        setNotFound(true);
-      }
-    } catch (error) {
-      console.error("Error loading blog post:", error);
-      setNotFound(true);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -239,7 +241,7 @@ export default function BlogDetailPage() {
             Blog Post Not Found
           </h1>
           <p className="text-lg text-gray-600 mb-8">
-            The blog post you're looking for doesn't exist or has been removed.
+            The blog post you&apos;re looking for doesn&apos;t exist or has been removed.
           </p>
           <Link
             href="/blog"
@@ -331,11 +333,13 @@ export default function BlogDetailPage() {
         )}
 
         {/* Article Content */}
-        <article className="prose prose-lg prose-slate max-w-none mb-12">
-          <div
-            className="whitespace-pre-wrap leading-relaxed text-gray-700"
-            dangerouslySetInnerHTML={{ __html: post.content }}
-          />
+        <article className="prose prose-lg prose-slate max-w-none mb-12 prose-headings:font-bold prose-headings:text-slate-900 prose-h1:text-4xl prose-h2:text-3xl prose-h3:text-2xl prose-a:text-teal-600 prose-a:no-underline hover:prose-a:underline prose-code:text-teal-600 prose-code:bg-slate-100 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-slate-900 prose-pre:text-slate-100 prose-blockquote:border-l-teal-600 prose-blockquote:text-slate-700 prose-img:rounded-xl prose-img:shadow-lg">
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeRaw, rehypeSanitize, rehypeHighlight]}
+          >
+            {post.content}
+          </ReactMarkdown>
         </article>
 
         {/* Share & Like Actions */}

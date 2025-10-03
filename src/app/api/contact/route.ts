@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    let { name, email, message, website } = body;
+    const { name: rawName, email: rawEmail, message: rawMessage, website } = body;
 
     // Honeypot check - if filled, it's a bot
     if (website) {
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate input presence
-    if (!name || !email || !message) {
+    if (!rawName || !rawEmail || !rawMessage) {
       return NextResponse.json(
         { error: 'All fields are required' },
         { status: 400 }
@@ -96,9 +96,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Sanitize inputs
-    name = sanitizeInput(name);
-    email = sanitizeInput(email);
-    message = sanitizeInput(message);
+    const name = sanitizeInput(rawName);
+    const email = sanitizeInput(rawEmail);
+    const message = sanitizeInput(rawMessage);
 
     // Validate name format
     if (!isValidName(name)) {

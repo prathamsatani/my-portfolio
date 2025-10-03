@@ -26,7 +26,7 @@ export function getSafeErrorMessage(error: unknown): string {
 export function logError(
   context: string,
   error: unknown,
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 ) {
   const timestamp = new Date().toISOString();
   const errorMessage = error instanceof Error ? error.message : String(error);
