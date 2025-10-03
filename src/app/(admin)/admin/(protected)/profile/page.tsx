@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import { 
   RefreshCcw, 
   Save,
@@ -197,9 +198,11 @@ export default function ProfilePage() {
           <h3 className="text-lg font-semibold text-slate-900 mb-4">Profile Preview</h3>
           <div className="flex items-start gap-4">
             {profileForm.profile_image_url && (
-              <img
+              <Image
                 src={profileForm.profile_image_url}
                 alt={profileForm.full_name || "Profile"}
+                width={80}
+                height={80}
                 className="w-20 h-20 rounded-full object-cover border-2 border-teal-200"
               />
             )}

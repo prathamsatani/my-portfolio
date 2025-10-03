@@ -5,8 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   RefreshCcw, 
   Save, 
-  Edit2, 
-  Trash2,
   FileText,
   FolderOpen,
   Briefcase,
