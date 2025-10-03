@@ -2,6 +2,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { getAdminSession } from "@/lib/adminAuth";
 import { getSupabaseServiceRoleClient } from "@/lib/supabaseServer";
+import { logError, getSafeDatabaseError, getSafeValidationError } from "@/lib/errors";
+import { logAdminAction } from "@/lib/auditLog";
 
 const nullableDate = z.union([z.string().min(1), z.literal(""), z.null()]);
 
@@ -30,7 +32,12 @@ export async function PUT(
   const parsed = experienceUpdateSchema.safeParse(json);
 
   if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+    logError("Failed to validate experience update", parsed.error, {
+      userId: session.user.id,
+      experienceId: id,
+      payload: json,
+    });
+    return NextResponse.json({ error: getSafeValidationError(parsed.error) }, { status: 400 });
   }
 
   const payload = parsed.data;
@@ -47,15 +54,35 @@ export async function PUT(
     .maybeSingle();
 
   if (error) {
-    console.error("Failed to update experience:", error.message);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    logError("Failed to update experience", error, {
+      userId: session.user.id,
+      experienceId: id,
+      payload: payload,
+    });
+    return NextResponse.json({ error: getSafeDatabaseError(error) }, { status: 500 });
+  }
+
+  // Log the action
+  if (data) {
+    await logAdminAction(
+      session.user.id,
+      'UPDATE',
+      'experience',
+      id,
+      request,
+      {
+        title: data.title,
+        organization: data.organization,
+        updatedFields: Object.keys(payload),
+      }
+    );
   }
 
   return NextResponse.json(data ?? null);
 }
 
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   const { id } = await context.params;
@@ -66,15 +93,39 @@ export async function DELETE(
   }
 
   const supabase = getSupabaseServiceRoleClient();
+
+  // Get experience details before deletion for audit log
+  const { data: experience } = await supabase
+    .from("portfolio_experiences")
+    .select("title, organization")
+    .eq("id", id)
+    .maybeSingle();
+
   const { error } = await supabase
     .from("portfolio_experiences")
     .delete()
     .eq("id", id);
 
   if (error) {
-    console.error("Failed to delete experience:", error.message);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    logError("Failed to delete experience", error, {
+      userId: session.user.id,
+      experienceId: id,
+    });
+    return NextResponse.json({ error: getSafeDatabaseError(error) }, { status: 500 });
   }
+
+  // Log the action
+  await logAdminAction(
+    session.user.id,
+    'DELETE',
+    'experience',
+    id,
+    request,
+    experience ? {
+      title: experience.title,
+      organization: experience.organization,
+    } : undefined
+  );
 
   return NextResponse.json({ success: true });
 }

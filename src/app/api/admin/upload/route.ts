@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseRouteHandlerClient } from "@/lib/supabaseServer";
 import { generateUniqueFileName } from "@/lib/supabaseStorage";
+import { getSafeErrorMessage, logError } from "@/lib/errors";
+import { logAdminAction } from "@/lib/auditLog";
 
 export async function POST(request: NextRequest) {
   try {
@@ -47,7 +49,7 @@ export async function POST(request: NextRequest) {
       "image/png",
       "image/gif",
       "image/webp",
-      "image/svg+xml",
+      // "image/svg+xml" - Removed for security (SVG can contain scripts)
       "application/pdf",
       "video/mp4",
       "video/webm",
@@ -78,9 +80,13 @@ export async function POST(request: NextRequest) {
       });
 
     if (error) {
-      console.error("Upload error:", error);
+      logError("Upload failed", error, {
+        fileName: file.name,
+        fileType: file.type,
+        fileSize: file.size,
+      });
       return NextResponse.json(
-        { error: `Failed to upload file: ${error.message}` },
+        { error: getSafeErrorMessage(error) },
         { status: 500 }
       );
     }
@@ -90,6 +96,21 @@ export async function POST(request: NextRequest) {
       .from("public")
       .getPublicUrl(data.path);
 
+    // Log the upload action
+    await logAdminAction(
+      user.id,
+      'UPLOAD',
+      'file',
+      data.path,
+      request,
+      {
+        fileName: fileName,
+        fileType: file.type,
+        fileSize: file.size,
+        directory,
+      }
+    );
+
     return NextResponse.json({
       success: true,
       url: urlData.publicUrl,
@@ -97,9 +118,9 @@ export async function POST(request: NextRequest) {
       fileName: fileName,
     });
   } catch (error) {
-    console.error("Unexpected error:", error);
+    logError("Unexpected upload error", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: getSafeErrorMessage(error) },
       { status: 500 }
     );
   }
@@ -139,21 +160,33 @@ export async function DELETE(request: NextRequest) {
       .remove([filePath]);
 
     if (error) {
-      console.error("Delete error:", error);
+      logError("Delete failed", error, { filePath });
       return NextResponse.json(
-        { error: `Failed to delete file: ${error.message}` },
+        { error: getSafeErrorMessage(error) },
         { status: 500 }
       );
     }
+
+    // Log the delete action
+    await logAdminAction(
+      user.id,
+      'DELETE',
+      'file',
+      filePath,
+      request,
+      {
+        filePath,
+      }
+    );
 
     return NextResponse.json({
       success: true,
       message: "File deleted successfully",
     });
   } catch (error) {
-    console.error("Unexpected error:", error);
+    logError("Unexpected delete error", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: getSafeErrorMessage(error) },
       { status: 500 }
     );
   }

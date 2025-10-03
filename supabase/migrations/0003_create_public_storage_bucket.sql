@@ -14,7 +14,7 @@ values (
     'image/png',
     'image/gif',
     'image/webp',
-    'image/svg+xml',
+    -- 'image/svg+xml' removed for security (SVG can contain scripts)
     'application/pdf',
     'video/mp4',
     'video/webm'

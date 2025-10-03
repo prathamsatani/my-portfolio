@@ -9,7 +9,8 @@ export default function ContactSection() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    message: ''
+    message: '',
+    website: '' // Honeypot field
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -56,7 +57,7 @@ export default function ContactSection() {
       }
 
       setSubmitted(true);
-      setFormData({ name: '', email: '', message: '' });
+      setFormData({ name: '', email: '', message: '', website: '' });
     } catch (error) {
       console.error('Error sending message:', error);
       setError(error instanceof Error ? error.message : 'Failed to send message. Please try again.');
@@ -194,6 +195,18 @@ export default function ContactSection() {
                       {error}
                     </div>
                   )}
+                </div>
+
+                {/* Honeypot field - hidden from users, catches bots */}
+                <div style={{ position: 'absolute', left: '-9999px' }} aria-hidden="true">
+                  <input
+                    type="text"
+                    name="website"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    value={formData.website}
+                    onChange={(e) => handleInputChange('website', e.target.value)}
+                  />
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-6">

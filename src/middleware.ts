@@ -11,7 +11,9 @@ export async function middleware(request: NextRequest) {
 
   // ALWAYS allow the login page - no checks needed
   if (pathname === "/admin/login") {
-    console.log("[Middleware] Allowing access to login page");
+    if (process.env.NODE_ENV === 'development') {
+      console.log("[Middleware] Allowing access to login page");
+    }
     return NextResponse.next();
   }
 
@@ -33,7 +35,9 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  console.log("[Middleware] Checking auth for:", pathname);
+  if (process.env.NODE_ENV === 'development') {
+    console.log("[Middleware] Checking auth for:", pathname);
+  }
 
   // Create Supabase client for middleware
   const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
@@ -57,17 +61,23 @@ export async function middleware(request: NextRequest) {
 
   const isAuthorised = session?.user?.app_metadata?.role === "admin";
 
-  console.log("[Middleware] Session exists:", !!session);
-  console.log("[Middleware] User role:", session?.user?.app_metadata?.role);
-  console.log("[Middleware] Is authorized:", isAuthorised);
+  if (process.env.NODE_ENV === 'development') {
+    console.log("[Middleware] Session exists:", !!session);
+    console.log("[Middleware] User role:", session?.user?.app_metadata?.role);
+    console.log("[Middleware] Is authorized:", isAuthorised);
+  }
 
   if (isAuthorised) {
-    console.log("[Middleware] Access granted to:", pathname);
+    if (process.env.NODE_ENV === 'development') {
+      console.log("[Middleware] Access granted to:", pathname);
+    }
     return response;
   }
 
   // Redirect to login if not authorized
-  console.log("[Middleware] Redirecting to login from:", pathname);
+  if (process.env.NODE_ENV === 'development') {
+    console.log("[Middleware] Redirecting to login from:", pathname);
+  }
   const redirectUrl = request.nextUrl.clone();
   redirectUrl.pathname = "/admin/login";
   redirectUrl.searchParams.set("redirectTo", pathname);

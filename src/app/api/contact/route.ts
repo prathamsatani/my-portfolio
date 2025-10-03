@@ -71,7 +71,21 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    let { name, email, message } = body;
+    let { name, email, message, website } = body;
+
+    // Honeypot check - if filled, it's a bot
+    if (website) {
+      console.warn('Bot detected via honeypot:', {
+        ip,
+        timestamp: new Date().toISOString(),
+      });
+      
+      // Return fake success to not alert the bot
+      return NextResponse.json(
+        { success: true, message: 'Message sent successfully!' },
+        { status: 200 }
+      );
+    }
 
     // Validate input presence
     if (!name || !email || !message) {

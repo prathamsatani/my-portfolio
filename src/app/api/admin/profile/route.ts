@@ -2,6 +2,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { getAdminSession } from "@/lib/adminAuth";
 import { getSupabaseServiceRoleClient } from "@/lib/supabaseServer";
+import { getSafeDatabaseError, getSafeValidationError, logError } from "@/lib/errors";
+import { logAdminAction } from "@/lib/auditLog";
 
 const profileSchema = z.object({
   full_name: z.string().max(120).optional(),
@@ -25,9 +27,11 @@ export async function PATCH(request: NextRequest) {
   const parsed = profileSchema.safeParse(json);
 
   if (!parsed.success) {
-    console.error("Profile validation failed:", parsed.error);
+    logError("Profile validation failed", parsed.error, {
+      userId: session.user.id,
+    });
     const errorMessage = parsed.error.issues.map(issue => `${issue.path.join('.')}: ${issue.message}`).join(', ');
-    return NextResponse.json({ error: errorMessage }, { status: 400 });
+    return NextResponse.json({ error: getSafeValidationError(new Error(errorMessage)) }, { status: 400 });
   }
 
   const payload = parsed.data;
@@ -40,8 +44,10 @@ export async function PATCH(request: NextRequest) {
     .maybeSingle();
 
   if (selectError) {
-    console.error("Failed to check existing profile:", selectError.message);
-    return NextResponse.json({ error: selectError.message }, { status: 500 });
+    logError("Failed to check existing profile", selectError, {
+      userId: session.user.id,
+    });
+    return NextResponse.json({ error: getSafeDatabaseError(selectError) }, { status: 500 });
   }
 
   const mutationPayload = {
@@ -70,9 +76,24 @@ export async function PATCH(request: NextRequest) {
   }
 
   if (mutationError) {
-    console.error("Failed to save profile:", mutationError.message);
-    return NextResponse.json({ error: mutationError.message }, { status: 500 });
+    logError("Failed to save profile", mutationError, {
+      userId: session.user.id,
+      isUpdate: !!existing?.id,
+    });
+    return NextResponse.json({ error: getSafeDatabaseError(mutationError) }, { status: 500 });
   }
+
+  // Log the action
+  await logAdminAction(
+    session.user.id,
+    existing?.id ? 'UPDATE' : 'CREATE',
+    'profile',
+    existing?.id || null,
+    request,
+    {
+      fields: Object.keys(payload),
+    }
+  );
 
   return NextResponse.json({ success: true });
 }

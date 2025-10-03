@@ -2,6 +2,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { getAdminSession } from "@/lib/adminAuth";
 import { getSupabaseServiceRoleClient } from "@/lib/supabaseServer";
+import { logError, getSafeDatabaseError, getSafeValidationError } from "@/lib/errors";
+import { logAdminAction } from "@/lib/auditLog";
 
 const projectUpdateSchema = z.object({
   title: z.string().min(3).optional(),
@@ -31,7 +33,12 @@ export async function PUT(
   const parsed = projectUpdateSchema.safeParse(json);
 
   if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+    logError("Failed to validate project update", parsed.error, {
+      userId: session.user.id,
+      projectId: id,
+      payload: json,
+    });
+    return NextResponse.json({ error: getSafeValidationError(parsed.error) }, { status: 400 });
   }
 
   const supabase = getSupabaseServiceRoleClient();
@@ -48,15 +55,35 @@ export async function PUT(
     .maybeSingle();
 
   if (error) {
-    console.error("Failed to update project:", error.message);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    logError("Failed to update project", error, {
+      userId: session.user.id,
+      projectId: id,
+      payload: parsed.data,
+    });
+    return NextResponse.json({ error: getSafeDatabaseError(error) }, { status: 500 });
+  }
+
+  // Log the action
+  if (data) {
+    await logAdminAction(
+      session.user.id,
+      'UPDATE',
+      'project',
+      id,
+      request,
+      {
+        title: data.title,
+        category: data.category,
+        updatedFields: Object.keys(parsed.data),
+      }
+    );
   }
 
   return NextResponse.json(data ?? null);
 }
 
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   const { id } = await context.params;
@@ -67,15 +94,39 @@ export async function DELETE(
   }
 
   const supabase = getSupabaseServiceRoleClient();
+
+  // Get project details before deletion for audit log
+  const { data: project } = await supabase
+    .from("portfolio_projects")
+    .select("title, category")
+    .eq("id", id)
+    .maybeSingle();
+
   const { error } = await supabase
     .from("portfolio_projects")
     .delete()
     .eq("id", id);
 
   if (error) {
-    console.error("Failed to delete project:", error.message);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    logError("Failed to delete project", error, {
+      userId: session.user.id,
+      projectId: id,
+    });
+    return NextResponse.json({ error: getSafeDatabaseError(error) }, { status: 500 });
   }
+
+  // Log the action
+  await logAdminAction(
+    session.user.id,
+    'DELETE',
+    'project',
+    id,
+    request,
+    project ? {
+      title: project.title,
+      category: project.category,
+    } : undefined
+  );
 
   return NextResponse.json({ success: true });
 }
