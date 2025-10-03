@@ -144,7 +144,34 @@ export default function ProfilePage() {
             />
           )}
         </AnimatePresence>
+        {/* Profile Preview */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="mt-6 rounded-2xl border-2 border-slate-200 bg-white/80 backdrop-blur-sm p-6 shadow-lg"
+        >
+          <h3 className="text-lg font-semibold text-slate-900 mb-4">Profile Preview</h3>
+          <div className="flex items-start gap-4">
+            {profileForm.profile_image_url && (
+              <Image
+                src={profileForm.profile_image_url}
+                alt={profileForm.full_name || "Profile"}
+                width={80}
+                height={80}
+                className="w-20 h-20 rounded-full object-cover border-2 border-teal-200"
+              />
+            )}
+            <div className="flex-1">
+              <h4 className="text-xl font-bold text-slate-900">{profileForm.full_name || "Your Name"}</h4>
+              <p className="text-sm text-teal-600 font-medium">{profileForm.title || "Your Title"}</p>
+              <p className="text-sm text-slate-600 mt-1">{profileForm.location || "Location"}</p>
+              <p className="text-sm text-slate-700 mt-2">{profileForm.bio || "Your bio will appear here..."}</p>
+            </div>
+          </div>
+        </motion.div>
 
+        {/* Profile Form */}
         <div className="rounded-2xl border-2 border-slate-200 bg-white/80 backdrop-blur-sm p-6 shadow-lg">
           <form onSubmit={handleProfileSubmit} className="space-y-6">
             {/* Profile Image at Top Center */}
@@ -283,33 +310,6 @@ export default function ProfilePage() {
             </div>
           </form>
         </div>
-
-        {/* Profile Preview */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="mt-6 rounded-2xl border-2 border-slate-200 bg-white/80 backdrop-blur-sm p-6 shadow-lg"
-        >
-          <h3 className="text-lg font-semibold text-slate-900 mb-4">Profile Preview</h3>
-          <div className="flex items-start gap-4">
-            {profileForm.profile_image_url && (
-              <Image
-                src={profileForm.profile_image_url}
-                alt={profileForm.full_name || "Profile"}
-                width={80}
-                height={80}
-                className="w-20 h-20 rounded-full object-cover border-2 border-teal-200"
-              />
-            )}
-            <div className="flex-1">
-              <h4 className="text-xl font-bold text-slate-900">{profileForm.full_name || "Your Name"}</h4>
-              <p className="text-sm text-teal-600 font-medium">{profileForm.title || "Your Title"}</p>
-              <p className="text-sm text-slate-600 mt-1">{profileForm.location || "Location"}</p>
-              <p className="text-sm text-slate-700 mt-2">{profileForm.bio || "Your bio will appear here..."}</p>
-            </div>
-          </div>
-        </motion.div>
       </div>
     </div>
   );

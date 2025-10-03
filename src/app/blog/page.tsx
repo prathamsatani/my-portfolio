@@ -11,6 +11,7 @@ export default function BlogPage() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<boolean>(false);
   const [likeCounts, setLikeCounts] = useState<Record<string, number>>({});
+  const [likedPosts, setLikedPosts] = useState<Record<string, boolean>>({});
   const [shareFeedback, setShareFeedback] = useState<Record<string, string | undefined>>({});
   const [commentForms, setCommentForms] = useState<Record<string, { author: string; message: string }>>({});
   const [commentSubmitting, setCommentSubmitting] = useState<Record<string, boolean>>({});
@@ -25,6 +26,16 @@ export default function BlogPage() {
         setUser(false);
       }
     };
+
+    // Load liked posts from localStorage
+    const savedLikes = localStorage.getItem('likedPosts');
+    if (savedLikes) {
+      try {
+        setLikedPosts(JSON.parse(savedLikes));
+      } catch (error) {
+        console.error('Failed to parse liked posts from localStorage:', error);
+      }
+    }
 
     checkUser();
     loadPosts();
@@ -72,16 +83,36 @@ export default function BlogPage() {
   };
 
   const handleLike = async (postId: string) => {
+    const isCurrentlyLiked = likedPosts[postId] || false;
+    const newLikedState = !isCurrentlyLiked;
+    
+    // Optimistically update UI
+    setLikedPosts(prev => {
+      const updated = { ...prev, [postId]: newLikedState };
+      localStorage.setItem('likedPosts', JSON.stringify(updated));
+      return updated;
+    });
+
+    // Optimistically update like count
+    setLikeCounts(prev => ({
+      ...prev,
+      [postId]: (prev[postId] ?? 0) + (newLikedState ? 1 : -1),
+    }));
+
     try {
       const response = await fetch(`/api/blogs/${postId}/like`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ unlike: isCurrentlyLiked }),
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to like post: ${response.status}`);
+        throw new Error(`Failed to ${isCurrentlyLiked ? 'unlike' : 'like'} post: ${response.status}`);
       }
 
       const data: { likes: number; warning?: string } = await response.json();
+      
+      // Update with server response
       setLikeCounts(prev => ({
         ...prev,
         [postId]: data.likes,
@@ -99,12 +130,21 @@ export default function BlogPage() {
         }, 3000);
       }
     } catch (error) {
-      console.error("Error liking post:", error);
+      console.error("Error toggling like:", error);
+      
+      // Revert on error
+      setLikedPosts(prev => {
+        const reverted = { ...prev, [postId]: isCurrentlyLiked };
+        localStorage.setItem('likedPosts', JSON.stringify(reverted));
+        return reverted;
+      });
+      
       setLikeCounts(prev => ({
         ...prev,
-        [postId]: (prev[postId] ?? 0) + 1,
+        [postId]: (prev[postId] ?? 0) + (isCurrentlyLiked ? 1 : -1),
       }));
-      setShareFeedback(prev => ({ ...prev, [postId]: "Saved locally" }));
+      
+      setShareFeedback(prev => ({ ...prev, [postId]: "Failed to update like" }));
       setTimeout(() => {
         setShareFeedback(prev => {
           if (!(postId in prev)) return prev;
@@ -294,9 +334,17 @@ export default function BlogPage() {
                               e.preventDefault();
                               handleLike(post.id);
                             }}
-                            className="inline-flex items-center gap-2 text-slate-700 hover:text-teal-600 font-medium transition-colors"
+                            className={`inline-flex items-center gap-2 font-medium transition-colors ${
+                              likedPosts[post.id] 
+                                ? 'text-red-600 hover:text-red-700' 
+                                : 'text-slate-700 hover:text-teal-600'
+                            }`}
                           >
-                            <Heart className="w-4 h-4" />
+                            <Heart 
+                              className={`w-4 h-4 transition-all ${
+                                likedPosts[post.id] ? 'fill-red-600' : ''
+                              }`} 
+                            />
                             <span>{likeCounts[post.id] ?? post.likes}</span>
                           </button>
                           <div className="flex items-center gap-2 text-slate-500 font-medium">

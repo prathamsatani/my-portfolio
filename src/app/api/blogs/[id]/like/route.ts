@@ -14,12 +14,22 @@ interface LikeResponse {
 }
 
 export async function POST(
-  _request: Request,
+  request: Request,
   context: { params: Promise<{ id: string }> }
 ) {
   const { id: blogId } = await context.params;
   if (!blogId) {
     return NextResponse.json({ message: "Blog id is required" }, { status: 400 });
+  }
+
+  // Parse request body to check if this is an unlike action
+  let isUnlike = false;
+  try {
+    const body = await request.json();
+    isUnlike = body.unlike === true;
+  } catch {
+    // If no body or invalid JSON, treat as a like action
+    isUnlike = false;
   }
 
   if (!hasSupabaseConfig) {
@@ -34,7 +44,7 @@ export async function POST(
     const supabase = getSupabaseServiceRoleClient();
     
     if (process.env.NODE_ENV === 'development') {
-      console.log('Like request for blog:', blogId);
+      console.log(`${isUnlike ? 'Unlike' : 'Like'} request for blog:`, blogId);
     }
     const { data, error } = await supabase
       .from("blogs")
@@ -59,11 +69,15 @@ export async function POST(
       return NextResponse.json({ message: getSafeDatabaseError(error) }, { status: 500 });
     }
 
+    const currentLikes = data?.likes ?? 0;
+    const nextLikes = isUnlike 
+      ? Math.max(0, currentLikes - 1) // Prevent negative likes
+      : currentLikes + 1;
+
     if (process.env.NODE_ENV === 'development') {
-      console.log('Current likes:', data?.likes, 'Next likes:', (data?.likes ?? 0) + 1);
+      console.log('Current likes:', currentLikes, 'Next likes:', nextLikes);
     }
 
-    const nextLikes = (data?.likes ?? 0) + 1;
     const { error: updateError } = await supabase
       .from("blogs")
       .update({ likes: nextLikes })
