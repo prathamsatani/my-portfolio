@@ -67,6 +67,16 @@ html:not(.dark) body {
   background: linear-gradient(180deg, #0d9488, #2563eb);
 }
 
+/* Hide scrollbar utility class */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* Dark Mode Specific Styles */
 .dark .bg-white {
   background-color: #1e293b;

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import type { BlogPost } from "@/lib/data";
 import { Heart, MessageCircle, Share2 } from "lucide-react";
 
@@ -185,11 +186,14 @@ export default function BlogPage() {
                 <div key={post.id}>
                   <Link href={`/blog/${post.slug}`} className="block group h-full">
                     <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2 h-full flex flex-col">
-                      <div className="aspect-video bg-gray-100 overflow-hidden">
-                        <img 
-                          src={post.cover_image_url || 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=300&fit=crop'} 
-                          alt={post.title} 
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                      <div className="relative aspect-video bg-gray-100 overflow-hidden">
+                        <Image
+                          src={post.cover_image_url || "https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=300&fit=crop"}
+                          alt={post.title}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          sizes="(min-width: 1280px) 30vw, (min-width: 768px) 45vw, 100vw"
+                          unoptimized
                         />
                       </div>
                       <div className="p-6 flex-grow flex flex-col">

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Calendar, GraduationCap, BookOpen } from "lucide-react";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
-import { getExperiences, type Experience } from "@/lib/data";
+import type { Experience } from "@/lib/data";
 
 const itemVariants = {
   hidden: { opacity: 0, x: -50 },
@@ -25,11 +25,25 @@ export default function EducationSection() {
 
   const loadEducation = async () => {
     try {
-      const data = getExperiences();
+      const response = await fetch("/api/portfolio/experiences");
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch education: ${response.status}`);
+      }
+
+      const data = (await response.json()) as Experience[];
       const education = data.filter(exp => exp.type === 'education');
       setEducationItems(education);
     } catch (error) {
       console.error('Error loading education:', error);
+      try {
+        const fallbackModule = await import("@/lib/data");
+        const data = fallbackModule.getExperiences();
+        const education = data.filter(exp => exp.type === 'education');
+        setEducationItems(education);
+      } catch (fallbackError) {
+        console.error("Error loading fallback education data:", fallbackError);
+      }
     } finally {
       setLoading(false);
     }

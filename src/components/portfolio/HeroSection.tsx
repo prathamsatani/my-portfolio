@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowDown, Download, Mail, Github, Linkedin, Sparkles } from "lucide-react";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { UserData } from "@/lib/data";
@@ -37,8 +38,6 @@ const itemVariants = {
 };
 
 export default function HeroSection({ userData }: HeroSectionProps) {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
   
@@ -57,7 +56,6 @@ export default function HeroSection({ userData }: HeroSectionProps) {
       const y = (clientY - innerHeight / 2) / innerHeight;
       mouseX.set(x);
       mouseY.set(y);
-      setMousePosition({ x: clientX, y: clientY });
     };
 
     window.addEventListener('mousemove', handleMouseMove);
@@ -220,10 +218,14 @@ export default function HeroSection({ userData }: HeroSectionProps) {
                   transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
                   style={{ backgroundSize: "200% 200%" }}
                 >
-                  <img 
-                    src={userData?.profile_image_url || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face"}
-                    alt="Profile"
-                    className="w-full h-full object-cover rounded-3xl shadow-2xl"
+                  <Image
+                    src={userData?.profile_image_url || "/pratham.jpg"}
+                    alt={userData?.full_name ? `${userData.full_name} portrait` : "Profile"}
+                    fill
+                    className="object-cover rounded-3xl shadow-2xl"
+                    sizes="(min-width: 1024px) 24rem, 80vw"
+                    priority
+                    unoptimized
                   />
                 </motion.div>
                 

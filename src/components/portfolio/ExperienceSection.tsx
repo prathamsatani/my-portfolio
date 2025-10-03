@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Calendar, GraduationCap, Briefcase, FlaskConical } from "lucide-react";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
-import { getExperiences, type Experience } from "@/lib/data";
+import type { Experience } from "@/lib/data";
 
 const typeIcons = {
   education: GraduationCap,
@@ -37,11 +37,25 @@ export default function ExperienceSection() {
 
   const loadExperiences = async () => {
     try {
-      const data = getExperiences();
+      const response = await fetch("/api/portfolio/experiences");
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch experiences: ${response.status}`);
+      }
+
+      const data = (await response.json()) as Experience[];
       const workExperiences = data.filter(exp => exp.type === 'work' || exp.type === 'research');
       setExperiences(workExperiences);
     } catch (error) {
       console.error('Error loading experiences:', error);
+      try {
+        const fallbackModule = await import("@/lib/data");
+        const data = fallbackModule.getExperiences();
+        const workExperiences = data.filter(exp => exp.type === 'work' || exp.type === 'research');
+        setExperiences(workExperiences);
+      } catch (fallbackError) {
+        console.error("Error loading fallback experiences:", fallbackError);
+      }
     } finally {
       setLoading(false);
     }

@@ -21,7 +21,7 @@ export interface Experience {
   organization: string;
   start_date: string | null;
   end_date: string | null;
-  description: string;
+  description?: string;
   type: "education" | "work" | "research";
   current: boolean;
 }

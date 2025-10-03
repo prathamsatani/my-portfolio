@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import { ExternalLink, Github, Filter, Sparkles } from "lucide-react";
-import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "framer-motion";
-import { getProjects, getProjectsByCategory, type Project } from "@/lib/data";
+import { motion, AnimatePresence } from "framer-motion";
 import ScrollReveal from "@/components/effects/ScrollReveal";
+import type { Project } from "@/lib/data";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -50,11 +50,25 @@ export default function ProjectsSection() {
 
   const loadProjects = async () => {
     try {
-      const data = getProjects();
+      const response = await fetch("/api/portfolio/projects");
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch projects: ${response.status}`);
+      }
+
+      const data = (await response.json()) as Project[];
       setProjects(data);
       setFilteredProjects(data);
     } catch (error) {
-      console.error('Error loading projects:', error);
+      console.error("Error loading projects:", error);
+      try {
+        const fallbackModule = await import("@/lib/data");
+        const fallback = fallbackModule.getProjects();
+        setProjects(fallback);
+        setFilteredProjects(fallback);
+      } catch (fallbackError) {
+        console.error("Error loading fallback projects:", fallbackError);
+      }
     } finally {
       setLoading(false);
     }

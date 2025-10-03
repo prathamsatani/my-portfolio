@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { GraduationCap, Target, Code, Brain, Zap } from "lucide-react";
+import React from "react";
+import { GraduationCap, Target, Brain, Zap } from "lucide-react";
 import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import ScrollReveal from "@/components/effects/ScrollReveal";
@@ -32,6 +32,10 @@ const skills = [
 
 export default function AboutSection({ userData }: AboutSectionProps) {
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 });
+  const displayName = userData?.full_name ?? "AI graduate student";
+  const displayTitle = userData?.title ?? "Master of Science in Artificial Intelligence";
+  const displayLocation = userData?.location ?? "Northeastern University";
+  const displayBio = userData?.bio ?? "I'm a passionate AI graduate student pursuing my Master of Science in Artificial Intelligence. My journey in tech combines research experience with practical software development skills.";
   
   return (
     <section id="about" className="relative py-24 bg-white overflow-hidden">
@@ -64,14 +68,11 @@ export default function AboutSection({ userData }: AboutSectionProps) {
           <div className="space-y-8">
             <div className="prose prose-lg text-gray-600">
               <p className="text-xl leading-relaxed">
-                I&apos;m a passionate AI graduate student at <strong>Northeastern University</strong>, 
-                pursuing my Master of Science in Artificial Intelligence. My journey in tech 
-                combines research experience with practical software development skills.
+                Hi, I&apos;m <strong>{displayName}</strong>, an AI professional at <strong>{displayLocation}</strong>.
+                I&apos;m currently pursuing <strong>{displayTitle}</strong>.
               </p>
               <p className="leading-relaxed">
-                I specialize in <strong>machine learning engineering</strong>, with hands-on 
-                experience in deep learning, computer vision, and natural language processing. 
-                My goal is to build scalable AI systems that solve real-world problems.
+                {displayBio}
               </p>
             </div>
 

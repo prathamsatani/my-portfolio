@@ -35,6 +35,7 @@ A modern, feature-rich portfolio website built with Next.js 15, showcasing AI/ML
 - **Dynamic Imports** - Code splitting for optimal performance
 - **Form Handling** - Contact form with email integration (Resend/Nodemailer)
 - **Supabase-backed Blog** - Like counts and comments persisted via Supabase Postgres
+- **Secure Admin Portal** - Role-gated dashboard to manage blogs, projects, experiences, and profile data
 - **Error Tracking** - Sentry integration for monitoring
 - **SEO Optimized** - Meta tags and semantic HTML
 
@@ -43,115 +44,41 @@ A modern, feature-rich portfolio website built with Next.js 15, showcasing AI/ML
 ### Prerequisites
 - Node.js 18+ installed
 - npm or yarn package manager
+## 🗄️ Supabase Setup
 
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone <your-repo-url>
-   cd my-portfolio
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install --legacy-peer-deps
-   # or
-   yarn install
-   ```
-
-3. **Set up environment variables**
-   
-  Create a `.env.local` file in the root directory:
-  ```env
-  # Email Configuration (choose one)
-  RESEND_API_KEY=your_resend_api_key
-  # OR
-  EMAIL_USER=your_email@gmail.com
-  EMAIL_PASS=your_app_password
-
-  # Supabase (Required in production)
-  NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-  NEXT_PUBLIC_SUPABASE_ANON_KEY=your_public_anon_key
-  SUPABASE_URL=https://your-project.supabase.co
-  SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-
-  # Sentry (Optional)
-  SENTRY_DSN=your_sentry_dsn
+1. **Create a Supabase project** at [supabase.com](https://supabase.com) and copy the Project URL and keys from _Project Settings → API_.
+2. **Link the project with the Supabase CLI.** The npm scripts rely on `npx` so you don't need a global install, but you must be signed in first:
+  ```bash
+  npx --yes supabase@latest login
+  npx --yes supabase@latest link --project-ref your-project-ref
   ```
-
-4. **Run development server**
-   ```bash
-   npm run dev
-   ```
-
-5. **Open your browser**
-   Navigate to [http://localhost:3000](http://localhost:3000)
-
-### Build for Production
-
-```bash
-npm run build
-npm start
-```
-
-## 📁 Project Structure
-
-```
-my-portfolio/
-├── public/
-│   ├── Pratham Satani.pdf    # Resume file
-│   ├── pratham.jpg            # Profile image
-│   └── vercel.svg
-├── src/
-│   ├── app/
-│   │   ├── api/
-│   │   │   ├── blogs/
-│   │   │   │   └── route.ts   # Supabase blog listing API
-│   │   │   ├── blogs/[id]/like/
-│   │   │   │   └── route.ts   # Supabase like endpoint
-│   │   │   └── contact/
-│   │   │       └── route.ts   # Contact form API
-│   │   ├── blog/
-│   │   │   └── page.tsx       # Blog page
-│   │   ├── favicon.ico
-│   │   ├── globals.css        # Global styles & animations
-│   │   ├── layout.tsx         # Root layout
-│   │   └── page.tsx           # Home page
-│   ├── components/
-│   │   ├── effects/
-│   │   │   ├── AnimatedBackground.tsx  # Gradient backgrounds
-│   │   │   ├── BackToTop.tsx           # Back to top button
-│   │   │   ├── FloatingParticles.tsx   # 3D particles
-│   │   │   ├── LoadingSpinner.tsx      # Loading animation
-│   │   │   ├── ScrollReveal.tsx        # Scroll animations
-│   │   │   └── TiltCard.tsx            # 3D tilt effect
-│   │   ├── blog/
-│   │   │   └── BlogForm.tsx            # Blog post form
-│   │   ├── portfolio/
-│   │   │   ├── AboutSection.tsx        # About section
-│   │   │   ├── ContactSection.tsx      # Contact section
-│   │   │   ├── EducationSection.tsx    # Education section
-│   │   │   ├── ExperienceSection.tsx   # Experience section
-│   │   │   ├── HeroSection.tsx         # Hero section
-│   │   │   └── ProjectsSection.tsx     # Projects section
-│   │   └── Navigation.tsx              # Main navigation
-│   ├── data/
-│   │   ├── blogs.json         # Blog posts data
-│   │   ├── experiences.json   # Experience data
+3. **Run the migrations** that live in `supabase/migrations/`:
+  ```bash
+  npm run supabase:migrate
+  ```
+  (equivalent to `supabase db push`). The initial migration (`0001_create_portfolio_schema.sql`) provisions tables, triggers, and Row Level Security policies that mirror the production schema.
+4. **Seed starter content** so the UI renders with rich data:
+  ```bash
+  npm run supabase:seed
+  ```
+  (equivalent to `supabase db execute --file supabase/seed.sql`). The seed file matches the JSON fallbacks in `src/data/`, so local and remote environments stay consistent. Run `npm run supabase:refresh` to execute both steps sequentially.
+5. **Configure environment variables** in `.env.local` and your Vercel project settings:
 │   │   ├── projects.json      # Projects data
 │   │   └── user.json          # User profile data
 │   └── lib/
 │       ├── data.ts            # Static data helpers & types
 │       ├── supabaseClient.ts  # Browser Supabase client
 │       └── supabaseServer.ts  # Server-side Supabase client
-├── .env.local                 # Environment variables
+6. **Create an admin user** for the dashboard. In Supabase Studio go to _Authentication → Users_, add a new user (or invite yourself), then run the SQL below to assign the `admin` role:
 ├── eslint.config.mjs          # ESLint configuration
 ├── next.config.ts             # Next.js configuration
 ├── package.json               # Dependencies
 ├── postcss.config.mjs         # PostCSS configuration
 ├── tsconfig.json              # TypeScript configuration
-├── ENHANCEMENTS.md            # Detailed feature documentation
-└── README.md                  # This file
+   After updating metadata, the user can sign in at `/admin/login` and access the secure portal.
+7. **Deploy** – API routes will fall back to the JSON files locally if Supabase variables are absent, but production deployments should provide the keys for persistence and admin management.
+8. **Keep seeds in sync** – `npm run check:seed` (also runs automatically with `npm run lint`) validates that `supabase/seed.sql` still reflects the JSON fallbacks. Update / regenerate the seed file whenever you edit any entries in `src/data/`.
+  > Tip: the Supabase CLI invoked via `npx` caches locally after the first run. If you prefer, you can still [install it globally](https://supabase.com/docs/reference/cli/installation) and the scripts will pick it up automatically.
 ```
 
 ## 🎨 Customization
@@ -287,7 +214,7 @@ const particleCount = 2000; // Adjust this number
      excerpt text,
      cover_image_url text,
      tags text[] default '{}',
-     status text default 'draft',
+     status text check (status in ('draft','published')) default 'draft',
      featured boolean default false,
      created_date timestamptz default now(),
      likes integer default 0
@@ -301,23 +228,99 @@ const particleCount = 2000; // Adjust this number
      created_at timestamptz default now()
    );
 
+   create table if not exists public.portfolio_profile (
+     id uuid primary key default gen_random_uuid(),
+     full_name text,
+     email text,
+     bio text,
+     title text,
+     location text,
+     profile_image_url text,
+     github_url text,
+     linkedin_url text,
+     resume_url text,
+     updated_at timestamptz default now()
+   );
+
+   create table if not exists public.portfolio_projects (
+     id uuid primary key default gen_random_uuid(),
+     title text not null,
+     description text not null,
+     technologies text[] default '{}',
+     github_url text,
+     demo_url text,
+     image_url text,
+     category text check (category in ('machine_learning','deep_learning','data_science','web_development','other')) default 'other',
+     featured boolean default false,
+     created_date timestamptz default now()
+   );
+
+   create table if not exists public.portfolio_experiences (
+     id uuid primary key default gen_random_uuid(),
+     title text not null,
+     organization text not null,
+     start_date timestamptz,
+     end_date timestamptz,
+     description text,
+     type text check (type in ('education','work','research')) not null,
+     current boolean default false
+   );
+
    create index if not exists blog_comments_blog_id_idx on public.blog_comments(blog_id);
+   create index if not exists portfolio_projects_category_idx on public.portfolio_projects(category);
+   create index if not exists portfolio_experiences_type_idx on public.portfolio_experiences(type);
    ```
-3. **Enable Row Level Security** for both tables and add policies:
+3. **Enable Row Level Security (RLS)** for every table and add read-only public policies:
    ```sql
    alter table public.blogs enable row level security;
    alter table public.blog_comments enable row level security;
+   alter table public.portfolio_profile enable row level security;
+   alter table public.portfolio_projects enable row level security;
+   alter table public.portfolio_experiences enable row level security;
 
    create policy "Public read blogs" on public.blogs
      for select using (true);
 
    create policy "Public read blog comments" on public.blog_comments
      for select using (true);
+
+   create policy "Public read profile" on public.portfolio_profile
+     for select using (true);
+
+   create policy "Public read projects" on public.portfolio_projects
+     for select using (true);
+
+   create policy "Public read experiences" on public.portfolio_experiences
+     for select using (true);
    ```
-   Likes are incremented through the service role key, so no additional policy is required for updates.
-4. **Seed your data** (optional) by importing the existing `src/data/blogs.json` content into the `blogs` table and adding matching rows in `blog_comments`.
-5. **Configure environment variables** (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`) in both `.env.local` and your Vercel project settings. Keep the service role key server-side only—never expose it in client bundles.
-6. **Deploy** – the API routes will fall back to the JSON files locally if Supabase variables are absent, but production deployments should provide them for persistence.
+   Writes are executed exclusively through server-side routes using the Supabase service-role key.
+4. **Seed your data** (optional) by importing the existing JSON files in `src/data/` into the matching tables. You can also sign in to the admin portal and create entries manually once authentication is configured.
+5. **Configure environment variables** in `.env.local` and your Vercel project settings:
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_public_anon_key
+   SUPABASE_URL=https://your-project.supabase.co
+   SUPABASE_SERVICE_ROLE_KEY=your_service_role_key   # keep this server-side only!
+   ```
+6. **Create an admin user** for the dashboard. In Supabase Studio go to _Authentication → Users_, add a new user (or invite yourself), then run the SQL below to assign the `admin` role:
+   ```sql
+   update auth.users
+   set raw_app_meta_data = coalesce(raw_app_meta_data, '{}'::jsonb) || jsonb_build_object('role','admin')
+   where email = 'admin@example.com';
+   ```
+   After updating metadata, the user can sign in at `/admin/login` and access the secure portal.
+7. **Deploy** – API routes will fall back to the JSON files locally if Supabase variables are absent, but production deployments should provide the keys for persistence and admin management.
+
+## 🔐 Admin Portal
+
+- Access the secure dashboard at [`/admin`](http://localhost:3000/admin) after signing in through [`/admin/login`](http://localhost:3000/admin/login).
+- Only users with `app_metadata.role = "admin"` can authenticate; all protected routes are additionally enforced by middleware and server-side checks.
+- Manage content end-to-end:
+  - **Blogs** – create, update, publish/unpublish, and delete posts (with tag management).
+  - **Projects & Experiences** – maintain portfolio entries without touching JSON files.
+  - **Profile** – update headline, bio, social links, and resume URL.
+- All mutations go through server-only API routes that validate payloads with Zod and execute using the Supabase service-role key. No credentials ever reach the browser.
+- Sign out safely from the header; sessions are stored in secure cookies via Supabase Auth helpers.
 
 ## 🎭 Animation System
 

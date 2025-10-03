@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getBlogPosts } from "@/lib/data";
 import type { BlogPost } from "@/lib/data";
-import { getSupabaseServerClient } from "@/lib/supabaseServer";
+import { getSupabaseServiceRoleClient } from "@/lib/supabaseServer";
 
 const hasSupabaseConfig = Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
 
@@ -11,15 +11,15 @@ interface LikeResponse {
 
 export async function POST(
   _request: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
-  const blogId = params.id;
+  const { id: blogId } = await context.params;
   if (!blogId) {
     return NextResponse.json({ message: "Blog id is required" }, { status: 400 });
   }
 
   if (!hasSupabaseConfig) {
-  const fallbackBlog = getBlogPosts().find((blog: BlogPost) => blog.id === blogId);
+    const fallbackBlog = getBlogPosts().find((blog: BlogPost) => blog.id === blogId);
     return NextResponse.json(
       { likes: fallbackBlog?.likes ?? 0, warning: "Supabase not configured. Like counts are read-only in fallback mode." },
       { status: 200 }
@@ -27,7 +27,7 @@ export async function POST(
   }
 
   try {
-    const supabase = getSupabaseServerClient();
+    const supabase = getSupabaseServiceRoleClient();
     const { data, error } = await supabase
       .from("blogs")
       .select("likes")

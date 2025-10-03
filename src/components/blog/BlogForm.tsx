@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import dynamic from 'next/dynamic';
+import Image, { type ImageLoader } from "next/image";
 import 'react-quill/dist/quill.snow.css';
 import { Save, X, Loader2 } from 'lucide-react';
 
@@ -36,6 +37,7 @@ const slugify = (text: string) =>
     .replace(/--+/g, '-');
 
 export default function BlogForm({ post, onSave, onCancel }: BlogFormProps) {
+  const previewLoader: ImageLoader = ({ src }) => src;
   const [formData, setFormData] = useState({
     title: post?.title || '',
     slug: post?.slug || '',
@@ -176,7 +178,15 @@ export default function BlogForm({ post, onSave, onCancel }: BlogFormProps) {
               </div>
               {formData.cover_image_url && (
                 <div className="mt-4">
-                  <img src={formData.cover_image_url} alt="Cover" className="w-48 h-auto rounded-lg" />
+                  <Image
+                    src={formData.cover_image_url}
+                    alt="Cover preview"
+                    width={192}
+                    height={144}
+                    loader={previewLoader}
+                    unoptimized
+                    className="w-48 h-auto rounded-lg object-cover"
+                  />
                 </div>
               )}
             </div>

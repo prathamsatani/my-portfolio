@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getBlogPosts } from "@/lib/data";
 import type { BlogComment, BlogPost } from "@/lib/data";
-import { getSupabaseServerClient } from "@/lib/supabaseServer";
+import { getSupabaseServiceRoleClient } from "@/lib/supabaseServer";
 
 const hasSupabaseConfig = Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
 
@@ -29,8 +29,8 @@ const mapRowToBlogPost = (row: SupabaseBlogRow): BlogPost => ({
   id: row.id,
   title: row.title,
   slug: row.slug,
-  content: row.content,
-  excerpt: row.excerpt,
+  content: row.content ?? "",
+  excerpt: row.excerpt ?? "",
   cover_image_url: row.cover_image_url ?? undefined,
   tags: row.tags ?? [],
   status: row.status,
@@ -51,7 +51,7 @@ export async function GET() {
   }
 
   try {
-    const supabase = getSupabaseServerClient();
+  const supabase = getSupabaseServiceRoleClient();
     const { data, error } = await supabase
       .from("blogs")
       .select(

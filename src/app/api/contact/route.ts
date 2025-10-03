@@ -258,7 +258,7 @@ Message ID: ${Date.now()}-${Math.random().toString(36).substring(7)}
 }
 
 // Handle OPTIONS request for CORS
-export async function OPTIONS(request: NextRequest) {
+export async function OPTIONS() {
   return new NextResponse(null, {
     status: 200,
     headers: {

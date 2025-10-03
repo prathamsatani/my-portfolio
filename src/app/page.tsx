@@ -19,9 +19,17 @@ export default function Home() {
 
   const loadUserData = async () => {
     try {
-      setUserData(getUserData());
+      const response = await fetch("/api/portfolio/user");
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch user data: ${response.status}`);
+      }
+
+      const data = (await response.json()) as UserData;
+      setUserData(data);
     } catch (error) {
-      console.error('Error loading user data:', error);
+      console.error("Error loading user data:", error);
+      setUserData(getUserData());
     }
   };
 
