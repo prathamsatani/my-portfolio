@@ -12,6 +12,9 @@ export default function BlogPage() {
   const [user, setUser] = useState<boolean>(false);
   const [likeCounts, setLikeCounts] = useState<Record<string, number>>({});
   const [shareFeedback, setShareFeedback] = useState<Record<string, string | undefined>>({});
+  const [commentForms, setCommentForms] = useState<Record<string, { author: string; message: string }>>({});
+  const [commentSubmitting, setCommentSubmitting] = useState<Record<string, boolean>>({});
+  const [commentErrors, setCommentErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const checkUser = async () => {
@@ -141,6 +144,71 @@ export default function BlogPage() {
     }, 3000);
   };
 
+  const handleCommentSubmit = async (postId: string, e: React.FormEvent) => {
+    e.preventDefault();
+    const form = commentForms[postId];
+    
+    if (!form || !form.author.trim() || !form.message.trim()) {
+      setCommentErrors(prev => ({ ...prev, [postId]: "Please fill in all fields" }));
+      return;
+    }
+
+    setCommentSubmitting(prev => ({ ...prev, [postId]: true }));
+    setCommentErrors(prev => {
+      const next = { ...prev };
+      delete next[postId];
+      return next;
+    });
+
+    try {
+      const response = await fetch(`/api/blogs/${postId}/comment`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to post comment");
+      }
+
+      const newComment = await response.json();
+      
+      // Update posts with new comment
+      setPosts(prev => prev.map(post => 
+        post.id === postId 
+          ? { ...post, comments: [...post.comments, newComment] }
+          : post
+      ));
+
+      // Clear form
+      setCommentForms(prev => {
+        const next = { ...prev };
+        delete next[postId];
+        return next;
+      });
+
+      // Show success message
+      setShareFeedback(prev => ({ ...prev, [postId]: "Comment posted!" }));
+      setTimeout(() => {
+        setShareFeedback(prev => {
+          const next = { ...prev };
+          delete next[postId];
+          return next;
+        });
+      }, 3000);
+
+    } catch (error) {
+      console.error("Error posting comment:", error);
+      setCommentErrors(prev => ({ 
+        ...prev, 
+        [postId]: error instanceof Error ? error.message : "Failed to post comment" 
+      }));
+    } finally {
+      setCommentSubmitting(prev => ({ ...prev, [postId]: false }));
+    }
+  };
+
   return (
     <div className="bg-slate-50 min-h-screen pt-16">
       <header className="py-20 bg-white border-b border-gray-100">
@@ -260,17 +328,68 @@ export default function BlogPage() {
                             <span>Comments</span>
                             <span className="text-xs font-medium text-slate-500">({post.comments.length})</span>
                           </h3>
-                          <div className="space-y-3">
-                            {post.comments.map(comment => (
-                              <div key={comment.id} className="bg-slate-50 border border-slate-100 rounded-lg p-4">
-                                <div className="flex items-center justify-between text-xs text-slate-500">
-                                  <span className="font-semibold text-slate-900 text-sm">{comment.author}</span>
-                                  <span>{formatCommentDate(comment.date)}</span>
+                          
+                          {/* Existing Comments */}
+                          {post.comments.length > 0 && (
+                            <div className="space-y-3 mb-4">
+                              {post.comments.map(comment => (
+                                <div key={comment.id} className="bg-slate-50 border border-slate-100 rounded-lg p-4">
+                                  <div className="flex items-center justify-between text-xs text-slate-500">
+                                    <span className="font-semibold text-slate-900 text-sm">{comment.author}</span>
+                                    <span>{formatCommentDate(comment.date)}</span>
+                                  </div>
+                                  <p className="text-gray-600 mt-2 text-sm leading-relaxed">{comment.message}</p>
                                 </div>
-                                <p className="text-gray-600 mt-2 text-sm leading-relaxed">{comment.message}</p>
-                              </div>
-                            ))}
-                          </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Add Comment Form */}
+                          <form 
+                            onSubmit={(e) => handleCommentSubmit(post.id, e)}
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-3"
+                          >
+                            <h4 className="text-sm font-medium text-slate-900">Leave a comment</h4>
+                            <input
+                              type="text"
+                              placeholder="Your name"
+                              value={commentForms[post.id]?.author || ""}
+                              onChange={(e) => {
+                                e.stopPropagation();
+                                setCommentForms(prev => ({
+                                  ...prev,
+                                  [post.id]: { ...prev[post.id], author: e.target.value, message: prev[post.id]?.message || "" }
+                                }));
+                              }}
+                              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                              required
+                            />
+                            <textarea
+                              placeholder="Your comment (5-500 characters)"
+                              value={commentForms[post.id]?.message || ""}
+                              onChange={(e) => {
+                                e.stopPropagation();
+                                setCommentForms(prev => ({
+                                  ...prev,
+                                  [post.id]: { author: prev[post.id]?.author || "", message: e.target.value }
+                                }));
+                              }}
+                              rows={3}
+                              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none"
+                              required
+                            />
+                            {commentErrors[post.id] && (
+                              <p className="text-xs text-red-600">{commentErrors[post.id]}</p>
+                            )}
+                            <button
+                              type="submit"
+                              disabled={commentSubmitting[post.id]}
+                              className="px-4 py-2 text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 disabled:bg-slate-400 rounded-lg transition-colors"
+                            >
+                              {commentSubmitting[post.id] ? "Posting..." : "Post Comment"}
+                            </button>
+                          </form>
                         </div>
                       </div>
                     </div>
