@@ -50,9 +50,9 @@ const mapRowToBlogPost = (row: SupabaseBlogRow): BlogPost => ({
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const identifier = params.id;
+  const { id: identifier } = await params;
 
   if (!hasSupabaseConfig) {
     // Fallback to JSON data
