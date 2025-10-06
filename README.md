@@ -11,7 +11,6 @@ A modern, feature-rich portfolio website built with Next.js 15, showcasing AI/ML
 ## ✨ Features
 
 ### 🎨 Visual Effects & Animations
-### 🎨 Visual Effects & Animations
 - **3D Particle System** - Interactive floating particles using Three.js
 - **Scroll-Triggered Animations** - Smooth reveal animations using Intersection Observer
 - **Projects Section** - Showcase of ML/AI projects with filtering and 3D effects
