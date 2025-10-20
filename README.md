@@ -62,7 +62,7 @@ A modern, feature-rich portfolio website built with Next.js 15, showcasing AI/ML
   ```
   (equivalent to `supabase db execute --file supabase/seed.sql`). The seed file matches the JSON fallbacks in `src/data/`, so local and remote environments stay consistent. Run `npm run supabase:refresh` to execute both steps sequentially.
 5. **Configure environment variables** in `.env.local` and your Vercel project settings:
-'''
+```
 │   │   ├── projects.json      # Projects data
 │   │   └── user.json          # User profile data
 │   └── lib/
@@ -75,7 +75,7 @@ A modern, feature-rich portfolio website built with Next.js 15, showcasing AI/ML
 ├── package.json               # Dependencies
 ├── postcss.config.mjs         # PostCSS configuration
 ├── tsconfig.json              # TypeScript configuration
-'''
+```
    After updating metadata, the user can sign in at `/admin/login` and access the secure portal.
 7. **Deploy** – API routes will fall back to the JSON files locally if Supabase variables are absent, but production deployments should provide the keys for persistence and admin management.
 8. **Keep seeds in sync** – `npm run check:seed` (also runs automatically with `npm run lint`) validates that `supabase/seed.sql` still reflects the JSON fallbacks. Update / regenerate the seed file whenever you edit any entries in `src/data/`.
