@@ -69,7 +69,9 @@ A modern, feature-rich portfolio website built with Next.js 15, showcasing AI/ML
 │       ├── data.ts            # Static data helpers & types
 │       ├── supabaseClient.ts  # Browser Supabase client
 │       └── supabaseServer.ts  # Server-side Supabase client
+```
 6. **Create an admin user** for the dashboard. In Supabase Studio go to _Authentication → Users_, add a new user (or invite yourself), then run the SQL below to assign the `admin` role:
+```
 ├── eslint.config.mjs          # ESLint configuration
 ├── next.config.ts             # Next.js configuration
 ├── package.json               # Dependencies
