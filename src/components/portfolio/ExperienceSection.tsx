@@ -1,31 +1,10 @@
 ﻿"use client";
 
 import React, { useState, useEffect } from "react";
-import { Calendar, GraduationCap, Briefcase, FlaskConical } from "lucide-react";
+import { Calendar, Briefcase } from "lucide-react";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
 import type { Experience } from "@/lib/data";
-
-const typeIcons = {
-  education: GraduationCap,
-  work: Briefcase,
-  research: FlaskConical
-};
-
-const typeColors = {
-  education: "bg-blue-50 text-blue-600 border-blue-200",
-  work: "bg-green-50 text-green-600 border-green-200", 
-  research: "bg-purple-50 text-purple-600 border-purple-200"
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, x: -50 },
-  visible: { 
-    opacity: 1, 
-    x: 0,
-    transition: { type: 'spring' as const, stiffness: 100 }
-  }
-};
 
 export default function ExperienceSection() {
   const [experiences, setExperiences] = useState<Experience[]>([]);
@@ -67,90 +46,91 @@ export default function ExperienceSection() {
   };
 
   return (
-    <section id="experience" className="py-24 bg-gray-50">
+    <section id="experience" className="py-24 bg-white">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl lg:text-5xl font-bold text-slate-900 mb-6">
-            Work Experience
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="mb-16"
+        >
+          <h2 className="text-3xl font-bold text-slate-900 mb-4">
+            Experience
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            My professional journey in AI research and software development
+          <p className="text-lg text-slate-600 max-w-2xl">
+            My professional journey in AI research and software development.
           </p>
-          <div className="w-24 h-1 bg-gradient-to-r from-teal-500 to-blue-500 mx-auto mt-6"></div>
-        </div>
+        </motion.div>
 
         {loading ? (
-          <div className="space-y-8">
+          <div className="space-y-12">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="flex gap-6 animate-pulse">
-                <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
+              <div key={i} className="animate-pulse flex gap-8">
+                <div className="w-32 h-4 bg-slate-200 rounded"></div>
                 <div className="flex-1 space-y-3">
-                  <div className="h-6 bg-gray-200 rounded w-1/3"></div>
-                  <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                  <div className="h-6 bg-slate-200 rounded w-1/3"></div>
+                  <div className="h-4 bg-slate-200 rounded w-3/4"></div>
                 </div>
               </div>
             ))}
           </div>
         ) : experiences.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="w-24 h-24 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Briefcase className="w-12 h-12 text-green-600" />
-            </div>
-            <h3 className="text-2xl font-semibold text-slate-900 mb-4">Work Experience Timeline</h3>
-            <p className="text-gray-600 max-w-md mx-auto">
-              Professional work experience and research positions will be displayed here.
+          <div className="text-center py-16 border border-dashed border-slate-200 rounded-2xl">
+            <Briefcase className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+            <p className="text-slate-500">
+              No experience entries found.
             </p>
           </div>
         ) : (
-          <div className="max-w-4xl mx-auto">
-            <div className="relative">
-              <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-teal-500 to-blue-500"></div>
-              
-              {experiences.map((experience) => {
-                const IconComponent = typeIcons[experience.type] || Briefcase;
-                return (
-                  <motion.div 
-                    key={experience.id} 
-                    className="relative flex items-start gap-8 pb-12"
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true, amount: 0.5 }}
-                    variants={itemVariants}
-                  >
-                    <div className={`p-3 rounded-xl border-2 ${typeColors[experience.type] ?? "bg-slate-100 border-slate-200 text-slate-700"} z-10`}>
-                      <IconComponent className="w-6 h-6" />
+          <div className="space-y-12 relative border-l border-slate-200 ml-3 md:ml-0 md:border-l-0">
+            {experiences.map((experience, index) => {
+              return (
+                <motion.div 
+                  key={experience.id} 
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className="relative pl-8 md:pl-0"
+                >
+                  {/* Mobile Timeline Dot */}
+                  <div className="absolute left-[-5px] top-2 w-2.5 h-2.5 rounded-full bg-slate-200 border-2 border-white md:hidden"></div>
+
+                  <div className="md:grid md:grid-cols-[200px_1fr] md:gap-8">
+                    <div className="mb-2 md:mb-0">
+                      <span className="text-sm font-medium text-slate-500 flex items-center gap-2">
+                        <Calendar className="w-4 h-4" />
+                        {formatDate(experience.start_date)} — {formatDate(experience.end_date)}
+                      </span>
                     </div>
                     
-                    <div className="flex-1 min-w-0">
-                      <div className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-100">
-                        <div className="flex flex-wrap items-start justify-between gap-4 mb-4">
-                          <div>
-                            <h3 className="text-xl font-bold text-slate-900">
-                              {experience.title}
-                            </h3>
-                            <p className="text-lg text-teal-600 font-semibold">
-                              {experience.organization}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-2 text-gray-500">
-                            <Calendar className="w-4 h-4" />
-                            <span>
-                              {formatDate(experience.start_date)} - {formatDate(experience.end_date)}
-                            </span>
-                          </div>
-                        </div>
-                        {experience.description && (
-                          <p className="text-gray-600 leading-relaxed">
-                            {experience.description}
-                          </p>
+                    <div>
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="text-xl font-bold text-slate-900">
+                          {experience.title}
+                        </h3>
+                        {experience.type === 'research' && (
+                          <span className="px-2 py-0.5 text-xs font-medium bg-purple-100 text-purple-700 rounded-full">
+                            Research
+                          </span>
                         )}
                       </div>
+                      
+                      <div className="text-base font-medium text-slate-700 mb-4">
+                        {experience.organization}
+                      </div>
+                      
+                      {experience.description && (
+                        <p className="text-slate-600 leading-relaxed">
+                          {experience.description}
+                        </p>
+                      )}
                     </div>
-                  </motion.div>
-                );
-              })}
-            </div>
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
         )}
       </div>

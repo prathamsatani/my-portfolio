@@ -13,13 +13,17 @@ export default function ConditionalFooter() {
   }
   
   return (
-    <footer className="bg-gradient-to-br from-slate-50 to-slate-100 border-t border-gray-200 py-4">
+    <footer className="bg-white border-t border-slate-200 py-12">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="flex items-center gap-2">
-            <span className="w-8 h-1 bg-gradient-to-r from-teal-500 to-blue-500"></span>
-            <p className="text-gray-600 font-medium">Crafted with passion for AI and Machine Learning</p>
-            <span className="w-8 h-1 bg-gradient-to-r from-blue-500 to-purple-500"></span>
+        <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="text-sm text-slate-500">
+            &copy; {new Date().getFullYear()} Portfolio. All rights reserved.
+          </div>
+          
+          <div className="flex items-center gap-6">
+            <p className="text-sm text-slate-500">
+              Built with Next.js & Tailwind CSS
+            </p>
           </div>
         </div>
       </div>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { CheckCircle, Github, Linkedin, Mail, MapPin, Phone, Send } from "lucide-react";
 import { UserData, getUserData } from "@/lib/data";
+import { motion } from "framer-motion";
 
 export default function ContactSection() {
   const [userData, setUserData] = useState<UserData | null>(null);
@@ -71,24 +72,34 @@ export default function ContactSection() {
   };
 
   return (
-    <section id="contact" className="py-24 bg-white text-slate-900">
+    <section id="contact" className="py-24 bg-white">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl lg:text-5xl font-bold mb-6">
-            Let&apos;s Connect
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="mb-16"
+        >
+          <h2 className="text-3xl font-bold text-slate-900 mb-4">
+            Get in Touch
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-lg text-slate-600 max-w-2xl">
             Interested in collaborating or discussing opportunities? I&apos;d love to hear from you.
           </p>
-          <div className="w-24 h-1 bg-gradient-to-r from-teal-400 to-blue-400 mx-auto mt-6"></div>
-        </div>
+        </motion.div>
 
         <div className="grid lg:grid-cols-2 gap-16 items-start">
           {/* Contact Info */}
-          <div className="space-y-8">
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="space-y-8"
+          >
             <div>
-              <h3 className="text-2xl font-bold mb-6">Get in Touch</h3>
-              <p className="text-gray-600 text-lg leading-relaxed mb-8">
+              <p className="text-slate-600 text-lg leading-relaxed mb-8">
                 I&apos;m always open to discussing new opportunities, exciting projects, 
                 or just having a conversation about AI and machine learning. 
                 Feel free to reach out!
@@ -99,14 +110,14 @@ export default function ContactSection() {
             <div className="space-y-6">
               {userData?.email && (
                 <div className="flex items-center gap-4">
-                  <div className="p-3 bg-slate-100 rounded-xl">
-                    <Mail className="w-6 h-6 text-teal-600" />
+                  <div className="p-3 bg-slate-50 rounded-xl">
+                    <Mail className="w-6 h-6 text-slate-900" />
                   </div>
                   <div>
                     <p className="font-medium text-slate-900">Email</p>
                     <a 
                       href={`mailto:${userData.email}`}
-                      className="text-teal-400 hover:text-teal-300 transition-colors"
+                      className="text-slate-600 hover:text-slate-900 transition-colors"
                     >
                       {userData.email}
                     </a>
@@ -116,23 +127,23 @@ export default function ContactSection() {
 
               {userData?.location && (
                 <div className="flex items-center gap-4">
-                  <div className="p-3 bg-slate-100 rounded-xl">
-                    <MapPin className="w-6 h-6 text-teal-600" />
+                  <div className="p-3 bg-slate-50 rounded-xl">
+                    <MapPin className="w-6 h-6 text-slate-900" />
                   </div>
                   <div>
                     <p className="font-medium text-slate-900">Location</p>
-                    <p className="text-gray-600">{userData.location}</p>
+                    <p className="text-slate-600">{userData.location}</p>
                   </div>
                 </div>
               )}
 
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-slate-100 rounded-xl">
-                  <Phone className="w-6 h-6 text-teal-600" />
+                <div className="p-3 bg-slate-50 rounded-xl">
+                  <Phone className="w-6 h-6 text-slate-900" />
                 </div>
                 <div>
                   <p className="font-medium text-slate-900">Status</p>
-                  <p className="text-gray-600">Available for ML Engineer roles</p>
+                  <p className="text-slate-600">Available for ML Engineer roles</p>
                 </div>
               </div>
             </div>
@@ -146,7 +157,7 @@ export default function ContactSection() {
                     href={userData.github_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-3 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
+                    className="p-3 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors"
                   >
                     <Github className="w-5 h-5 text-slate-700 hover:text-slate-900" />
                   </a>
@@ -156,24 +167,30 @@ export default function ContactSection() {
                     href={userData.linkedin_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-3 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
+                    className="p-3 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors"
                   >
                     <Linkedin className="w-5 h-5 text-slate-700 hover:text-slate-900" />
                   </a>
                 )}
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Contact Form */}
-          <div className="bg-slate-100 rounded-2xl p-8">
+          <motion.div 
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="bg-slate-50 rounded-2xl p-8"
+          >
             {submitted ? (
               <div className="text-center py-12">
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
                   <CheckCircle className="w-8 h-8 text-green-600" />
                 </div>
                 <h3 className="text-2xl font-bold mb-4 text-slate-900">Message Sent!</h3>
-                <p className="text-gray-600 mb-6">
+                <p className="text-slate-600 mb-6">
                   Thank you for reaching out. I&apos;ll get back to you soon.
                 </p>
                 <button
@@ -217,7 +234,7 @@ export default function ContactSection() {
                       value={formData.name}
                       onChange={(e) => handleInputChange('name', e.target.value)}
                       placeholder="Your full name"
-                      className="w-full px-4 py-2 bg-white border border-slate-300 text-slate-900 placeholder:text-gray-400 focus:border-teal-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500/50"
+                      className="w-full px-4 py-2 bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-slate-900 rounded-lg focus:outline-none focus:ring-1 focus:ring-slate-900 transition-all"
                     />
                   </div>
                   <div className="space-y-2">
@@ -228,7 +245,7 @@ export default function ContactSection() {
                       value={formData.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
                       placeholder="your.email@example.com"
-                      className="w-full px-4 py-2 bg-white border border-slate-300 text-slate-900 placeholder:text-gray-400 focus:border-teal-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500/50"
+                      className="w-full px-4 py-2 bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-slate-900 rounded-lg focus:outline-none focus:ring-1 focus:ring-slate-900 transition-all"
                     />
                   </div>
                 </div>
@@ -241,14 +258,14 @@ export default function ContactSection() {
                     value={formData.message}
                     onChange={(e) => handleInputChange('message', e.target.value)}
                     placeholder="Tell me about your project or opportunity..."
-                    className="w-full px-4 py-2 bg-white border border-slate-300 text-slate-900 placeholder:text-gray-400 focus:border-teal-500 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-teal-500/50"
+                    className="w-full px-4 py-2 bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-slate-900 rounded-lg resize-none focus:outline-none focus:ring-1 focus:ring-slate-900 transition-all"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-teal-600 hover:bg-teal-700 text-white py-6 text-lg font-medium rounded-xl transition-all duration-200 hover:shadow-lg inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-slate-900 hover:bg-slate-800 text-white py-4 text-lg font-medium rounded-xl transition-all duration-200 inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? (
                     <div className="flex items-center gap-2">
@@ -264,7 +281,7 @@ export default function ContactSection() {
                 </button>
               </form>
             )}
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>

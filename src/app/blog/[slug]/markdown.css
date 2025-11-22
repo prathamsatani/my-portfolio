@@ -2,8 +2,9 @@
 
 /* Code blocks */
 .prose pre {
-  background-color: rgb(15 23 42);
-  color: rgb(241 245 249);
+  background-color: rgb(248 250 252);
+  color: rgb(30 41 59);
+  border: 1px solid rgb(226 232 240);
   border-radius: 0.75rem;
   padding: 1.5rem;
   overflow-x: auto;
@@ -16,7 +17,7 @@
 
 .prose pre code {
   background-color: transparent;
-  color: rgb(241 245 249);
+  color: inherit;
   padding: 0;
 }
 
@@ -179,90 +180,4 @@
 /* Task lists (GFM) */
 .prose input[type="checkbox"] {
   margin-right: 0.5rem;
-}
-
-/* Syntax highlighting for code blocks */
-.hljs {
-  background-color: rgb(15 23 42);
-  color: rgb(241 245 249);
-}
-
-.hljs-comment,
-.hljs-quote {
-  color: rgb(148 163 184);
-  font-style: italic;
-}
-
-.hljs-keyword,
-.hljs-selector-tag,
-.hljs-subst {
-  color: rgb(192 132 252);
-}
-
-.hljs-number,
-.hljs-literal,
-.hljs-variable,
-.hljs-template-variable,
-.hljs-tag .hljs-attr {
-  color: rgb(251 146 60);
-}
-
-.hljs-string,
-.hljs-doctag {
-  color: rgb(74 222 128);
-}
-
-.hljs-title,
-.hljs-section,
-.hljs-selector-id {
-  color: rgb(96 165 250);
-  font-weight: 700;
-}
-
-.hljs-type,
-.hljs-class .hljs-title {
-  color: rgb(250 204 21);
-}
-
-.hljs-tag,
-.hljs-name,
-.hljs-attribute {
-  color: rgb(45 212 191);
-}
-
-.hljs-regexp,
-.hljs-link {
-  color: rgb(34 211 238);
-}
-
-.hljs-symbol,
-.hljs-bullet {
-  color: rgb(244 114 182);
-}
-
-.hljs-built_in,
-.hljs-builtin-name {
-  color: rgb(129 140 248);
-}
-
-.hljs-meta {
-  color: rgb(100 116 139);
-}
-
-.hljs-deletion {
-  background-color: rgb(127 29 29);
-  color: rgb(254 202 202);
-}
-
-.hljs-addition {
-  background-color: rgb(20 83 45);
-  color: rgb(187 247 208);
-}
-
-.hljs-emphasis {
-  font-style: italic;
-}
-
-.hljs-strong {
-  font-weight: 700;
 }

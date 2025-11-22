@@ -4,7 +4,6 @@ import React from "react";
 import { GraduationCap, Target, Brain, Zap } from "lucide-react";
 import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
-import ScrollReveal from "@/components/effects/ScrollReveal";
 
 interface UserData {
   full_name?: string;
@@ -38,38 +37,27 @@ export default function AboutSection({ userData }: AboutSectionProps) {
   const displayBio = userData?.bio ?? "I'm a passionate AI graduate student pursuing my Master of Science in Artificial Intelligence. My journey in tech combines research experience with practical software development skills.";
   
   return (
-    <section id="about" className="relative py-24 bg-white overflow-hidden">
-      {/* Background Decoration */}
-      <div className="absolute top-20 right-0 w-96 h-96 bg-teal-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" />
-      <div className="absolute bottom-20 left-0 w-96 h-96 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '1s' }} />
-      
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
-        <ScrollReveal>
-          <div className="text-center mb-16">
-            <motion.h2 
-              className="text-4xl lg:text-5xl font-bold text-slate-900 mb-6"
-              initial={{ opacity: 0, y: 20 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6 }}
-            >
-              About Me
-            </motion.h2>
-            <motion.div 
-              className="w-24 h-1 bg-gradient-to-r from-teal-500 to-blue-500 mx-auto"
-              initial={{ width: 0 }}
-              animate={inView ? { width: 96 } : {}}
-              transition={{ duration: 0.8, delay: 0.2 }}
-            />
-          </div>
-        </ScrollReveal>
+    <section id="about" className="relative py-24 bg-slate-50">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+        <motion.div 
+          className="mb-16"
+          initial={{ opacity: 0, y: 20 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6 }}
+        >
+          <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
+            About Me
+          </h2>
+          <div className="h-1 w-20 bg-teal-500 rounded-full" />
+        </motion.div>
 
-        <div className="grid lg:grid-cols-2 gap-16 items-start">
+        <div className="grid lg:grid-cols-2 gap-16 items-start" ref={ref}>
           {/* Left Content */}
-          <div className="space-y-8">
-            <div className="prose prose-lg text-gray-600">
-              <p className="text-xl leading-relaxed">
-                Hi, I&apos;m <strong>{displayName}</strong>, an AI professional at <strong>{displayLocation}</strong>.
-                I&apos;m currently pursuing <strong>{displayTitle}</strong>.
+          <div className="space-y-10">
+            <div className="prose prose-lg text-slate-600">
+              <p className="text-xl leading-relaxed font-light">
+                Hi, I&apos;m <strong className="font-semibold text-slate-900">{displayName}</strong>, an AI professional at <strong className="font-semibold text-slate-900">{displayLocation}</strong>.
+                I&apos;m currently pursuing <strong className="font-semibold text-slate-900">{displayTitle}</strong>.
               </p>
               <p className="leading-relaxed">
                 {displayBio}
@@ -78,123 +66,61 @@ export default function AboutSection({ userData }: AboutSectionProps) {
 
             {/* Key Points */}
             <div className="grid gap-6">
-              <ScrollReveal delay={0.1}>
+              {[
+                { icon: GraduationCap, title: "Education Focus", desc: "Master of Science in AI at Northeastern University", color: "text-teal-600" },
+                { icon: Target, title: "Career Goal", desc: "Aspiring ML Engineer building scalable AI solutions", color: "text-blue-600" },
+                { icon: Brain, title: "Specialization", desc: "Deep Learning, Computer Vision, NLP", color: "text-purple-600" }
+              ].map((item, index) => (
                 <motion.div 
-                  className="flex items-start gap-4 group p-4 rounded-xl hover:bg-teal-50/50 transition-all duration-300 cursor-pointer"
-                  whileHover={{ x: 10 }}
+                  key={index}
+                  className="flex items-start gap-4 p-4 rounded-2xl bg-white border border-slate-100 hover:shadow-lg transition-all duration-300"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={inView ? { opacity: 1, x: 0 } : {}}
+                  transition={{ delay: index * 0.1 }}
                 >
-                  <motion.div 
-                    className="p-3 bg-gradient-to-br from-teal-50 to-teal-100 rounded-xl shadow-sm group-hover:shadow-md transition-shadow"
-                    whileHover={{ rotate: 360, scale: 1.1 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <GraduationCap className="w-6 h-6 text-teal-600" />
-                  </motion.div>
+                  <div className={`p-3 rounded-xl bg-slate-50 ${item.color}`}>
+                    <item.icon className="w-6 h-6" />
+                  </div>
                   <div>
-                    <h3 className="font-semibold text-slate-900 mb-2 group-hover:text-teal-600 transition-colors">Education Focus</h3>
-                    <p className="text-gray-600">Master of Science in AI at Northeastern University</p>
+                    <h3 className="font-semibold text-slate-900 mb-1">{item.title}</h3>
+                    <p className="text-slate-600 text-sm">{item.desc}</p>
                   </div>
                 </motion.div>
-              </ScrollReveal>
-
-              <ScrollReveal delay={0.2}>
-                <motion.div 
-                  className="flex items-start gap-4 group p-4 rounded-xl hover:bg-blue-50/50 transition-all duration-300 cursor-pointer"
-                  whileHover={{ x: 10 }}
-                >
-                  <motion.div 
-                    className="p-3 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl shadow-sm group-hover:shadow-md transition-shadow"
-                    whileHover={{ rotate: 360, scale: 1.1 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <Target className="w-6 h-6 text-blue-600" />
-                  </motion.div>
-                  <div>
-                    <h3 className="font-semibold text-slate-900 mb-2 group-hover:text-blue-600 transition-colors">Career Goal</h3>
-                    <p className="text-gray-600">Aspiring ML Engineer building scalable AI solutions</p>
-                  </div>
-                </motion.div>
-              </ScrollReveal>
-
-              <ScrollReveal delay={0.3}>
-                <motion.div 
-                  className="flex items-start gap-4 group p-4 rounded-xl hover:bg-purple-50/50 transition-all duration-300 cursor-pointer"
-                  whileHover={{ x: 10 }}
-                >
-                  <motion.div 
-                    className="p-3 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl shadow-sm group-hover:shadow-md transition-shadow"
-                    whileHover={{ rotate: 360, scale: 1.1 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <Brain className="w-6 h-6 text-purple-600" />
-                  </motion.div>
-                  <div>
-                    <h3 className="font-semibold text-slate-900 mb-2 group-hover:text-purple-600 transition-colors">Specialization</h3>
-                    <p className="text-gray-600">Deep Learning, Computer Vision, NLP</p>
-                  </div>
-                </motion.div>
-              </ScrollReveal>
+              ))}
             </div>
           </div>
 
           {/* Skills */}
-          <div className="space-y-8" ref={ref}>
-            <ScrollReveal delay={0.4}>
-              <div className="flex items-center gap-3 mb-6">
-                <motion.div 
-                  className="p-2 bg-gradient-to-br from-teal-500 to-blue-500 rounded-lg"
-                  animate={{ rotate: [0, 360] }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                >
-                  <Zap className="w-6 h-6 text-white" />
-                </motion.div>
-                <h3 className="text-2xl font-bold text-slate-900">
-                  Technical Skills
-                </h3>
-              </div>
-            </ScrollReveal>
+          <div className="space-y-8">
+            <div className="flex items-center gap-3 mb-6">
+              <Zap className="w-6 h-6 text-teal-500" />
+              <h3 className="text-2xl font-bold text-slate-900">
+                Technical Skills
+              </h3>
+            </div>
 
             <div className="space-y-6">
               {skills.map((skill, index) => (
-                <ScrollReveal key={skill.name} delay={0.5 + index * 0.1}>
-                  <motion.div 
-                    className="space-y-2 group"
-                    whileHover={{ x: 5 }}
-                  >
-                    <div className="flex justify-between items-center">
-                      <span className="font-medium text-slate-900 group-hover:text-teal-600 transition-colors">{skill.name}</span>
-                      <motion.span 
-                        className="text-sm font-semibold text-gray-500 group-hover:text-teal-600 transition-colors"
-                        initial={{ opacity: 0 }}
-                        animate={inView ? { opacity: 1 } : {}}
-                        transition={{ delay: 0.5 + index * 0.1 }}
-                      >
-                        {skill.level}%
-                      </motion.span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden shadow-inner">
-                      <motion.div 
-                        className="h-3 rounded-full relative overflow-hidden"
-                        style={{
-                          background: `linear-gradient(90deg, #14b8a6 0%, #3b82f6 ${skill.level}%, #8b5cf6 100%)`
-                        }}
-                        initial={{ width: 0 }}
-                        animate={inView ? { width: `${skill.level}%` } : {}}
-                        transition={{ 
-                          duration: 1,
-                          delay: 0.5 + index * 0.1,
-                          ease: "easeOut"
-                        }}
-                      >
-                        <motion.div
-                          className="absolute inset-0 shimmer"
-                          animate={{ x: [-1000, 1000] }}
-                          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                        />
-                      </motion.div>
-                    </div>
-                  </motion.div>
-                </ScrollReveal>
+                <motion.div 
+                  key={skill.name}
+                  className="space-y-2"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={inView ? { opacity: 1, y: 0 } : {}}
+                  transition={{ delay: 0.2 + index * 0.05 }}
+                >
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="font-medium text-slate-700">{skill.name}</span>
+                    <span className="text-slate-500">{skill.level}%</span>
+                  </div>
+                  <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                    <motion.div 
+                      className="h-full bg-slate-900 rounded-full"
+                      initial={{ width: 0 }}
+                      animate={inView ? { width: `${skill.level}%` } : {}}
+                      transition={{ duration: 1, delay: 0.2 + index * 0.05, ease: "easeOut" }}
+                    />
+                  </div>
+                </motion.div>
               ))}
             </div>
           </div>

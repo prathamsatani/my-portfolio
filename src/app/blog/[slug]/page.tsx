@@ -11,7 +11,7 @@ import rehypeSanitize from "rehype-sanitize";
 import rehypeHighlight from "rehype-highlight";
 import type { BlogPost } from "@/lib/data";
 import { Heart, MessageCircle, Share2, ArrowLeft, Calendar, Clock } from "lucide-react";
-import "highlight.js/styles/github-dark.css";
+import "highlight.js/styles/github.css";
 import "./markdown.css";
 
 export default function BlogDetailPage() {
