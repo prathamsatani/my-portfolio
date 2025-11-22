@@ -11,7 +11,6 @@ A modern, feature-rich portfolio website built with Next.js 15, showcasing AI/ML
 ## ✨ Features
 
 ### 🎨 Visual Effects & Animations
-### 🎨 Visual Effects & Animations
 - **3D Particle System** - Interactive floating particles using Three.js
 - **Scroll-Triggered Animations** - Smooth reveal animations using Intersection Observer
 - **Projects Section** - Showcase of ML/AI projects with filtering and 3D effects
@@ -47,36 +46,47 @@ A modern, feature-rich portfolio website built with Next.js 15, showcasing AI/ML
 ## 🗄️ Supabase Setup
 
 1. **Create a Supabase project** at [supabase.com](https://supabase.com) and copy the Project URL and keys from _Project Settings → API_.
+
 2. **Link the project with the Supabase CLI.** The npm scripts rely on `npx` so you don't need a global install, but you must be signed in first:
   ```bash
   npx --yes supabase@latest login
   npx --yes supabase@latest link --project-ref your-project-ref
   ```
+
 3. **Run the migrations** that live in `supabase/migrations/`:
   ```bash
   npm run supabase:migrate
   ```
   (equivalent to `supabase db push`). The initial migration (`0001_create_portfolio_schema.sql`) provisions tables, triggers, and Row Level Security policies that mirror the production schema.
+
 4. **Seed starter content** so the UI renders with rich data:
   ```bash
   npm run supabase:seed
   ```
   (equivalent to `supabase db execute --file supabase/seed.sql`). The seed file matches the JSON fallbacks in `src/data/`, so local and remote environments stay consistent. Run `npm run supabase:refresh` to execute both steps sequentially.
+
 5. **Configure environment variables** in `.env.local` and your Vercel project settings:
+```
 │   │   ├── projects.json      # Projects data
 │   │   └── user.json          # User profile data
 │   └── lib/
 │       ├── data.ts            # Static data helpers & types
 │       ├── supabaseClient.ts  # Browser Supabase client
 │       └── supabaseServer.ts  # Server-side Supabase client
+```
+
 6. **Create an admin user** for the dashboard. In Supabase Studio go to _Authentication → Users_, add a new user (or invite yourself), then run the SQL below to assign the `admin` role:
+```
 ├── eslint.config.mjs          # ESLint configuration
 ├── next.config.ts             # Next.js configuration
 ├── package.json               # Dependencies
 ├── postcss.config.mjs         # PostCSS configuration
 ├── tsconfig.json              # TypeScript configuration
+```
    After updating metadata, the user can sign in at `/admin/login` and access the secure portal.
+
 7. **Deploy** – API routes will fall back to the JSON files locally if Supabase variables are absent, but production deployments should provide the keys for persistence and admin management.
+
 8. **Keep seeds in sync** – `npm run check:seed` (also runs automatically with `npm run lint`) validates that `supabase/seed.sql` still reflects the JSON fallbacks. Update / regenerate the seed file whenever you edit any entries in `src/data/`.
   > Tip: the Supabase CLI invoked via `npx` caches locally after the first run. If you prefer, you can still [install it globally](https://supabase.com/docs/reference/cli/installation) and the scripts will pick it up automatically.
 ```
