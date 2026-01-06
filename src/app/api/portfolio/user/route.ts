@@ -7,10 +7,14 @@ export const dynamic = 'force-dynamic';
 
 type UserRow = UserData;
 
-const hasSupabaseConfig = Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
+const hasSupabaseConfig = Boolean(
+  (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL) && 
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 export async function GET() {
   if (!hasSupabaseConfig) {
+    console.warn("Missing Supabase configuration. Falling back to static data.");
     return NextResponse.json(getUserData());
   }
 
@@ -23,7 +27,6 @@ export async function GET() {
       )
       .limit(1)
       .maybeSingle();
-
     if (error) {
       console.error("Supabase user fetch error:", error.message);
       return NextResponse.json(getUserData());

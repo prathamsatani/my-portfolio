@@ -20,7 +20,6 @@ export default function Home() {
   const loadUserData = async () => {
     try {
       const response = await fetch("/api/portfolio/user");
-
       if (!response.ok) {
         throw new Error(`Failed to fetch user data: ${response.status}`);
       }

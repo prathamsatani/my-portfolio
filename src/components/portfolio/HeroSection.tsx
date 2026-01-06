@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowDown, Download, Mail, Github, Linkedin } from "lucide-react";
+import { ArrowDown, Download, Mail, Github, Linkedin, User } from "lucide-react";
 import { motion } from "framer-motion";
 import { UserData } from "@/lib/data";
 
@@ -126,16 +126,20 @@ export default function HeroSection({ userData }: HeroSectionProps) {
           >
             <div className="relative w-72 h-72 lg:w-96 lg:h-96">
               <div className="absolute inset-0 bg-slate-100 rounded-full transform translate-x-4 translate-y-4" />
-              <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-white shadow-2xl">
-                <Image
-                  src={userData?.profile_image_url || "/pratham.jpg"}
-                  alt={userData?.full_name ? `${userData.full_name} portrait` : "Profile"}
-                  fill
-                  className="object-cover"
-                  sizes="(min-width: 1024px) 24rem, 80vw"
-                  priority
-                  unoptimized
-                />
+              <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-white shadow-2xl bg-slate-50 flex items-center justify-center">
+                {userData?.profile_image_url ? (
+                  <Image
+                    src={userData.profile_image_url}
+                    alt={userData?.full_name ? `${userData.full_name} portrait` : "Profile"}
+                    fill
+                    className="object-cover"
+                    sizes="(min-width: 1024px) 24rem, 80vw"
+                    priority
+                    unoptimized
+                  />
+                ) : (
+                  <User className="w-24 h-24 text-slate-300" />
+                )}
               </div>
             </div>
           </motion.div>
