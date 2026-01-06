@@ -155,15 +155,20 @@ export default function ProjectsPage() {
   const deleteProject = async (id: string) => {
     if (!confirm("Delete this project?")) return;
 
-    const response = await fetch(`/api/admin/projects/${id}`, { method: "DELETE" });
-    if (!response.ok) {
-      const data = await response.json();
-      setProjectMessage(data.error ?? "Failed to delete project");
-      return;
-    }
+    try {
+      const response = await fetch(`/api/admin/projects/${id}`, { method: "DELETE" });
+      if (!response.ok) {
+        const data = await response.json();
+        setProjectMessage(data.error ?? "Failed to delete project");
+        return;
+      }
 
-    setProjectMessage("Project deleted");
-    await loadData();
+      setProjectMessage("Project deleted");
+      await loadData();
+    } catch (error) {
+      console.error("Delete failed:", error);
+      setProjectMessage("An error occurred while deleting the project");
+    }
   };
 
   if (isLoading) {
