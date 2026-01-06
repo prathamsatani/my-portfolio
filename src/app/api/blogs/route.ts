@@ -3,6 +3,8 @@ import { getBlogPosts } from "@/lib/data";
 import type { BlogComment, BlogPost } from "@/lib/data";
 import { getSupabaseServiceRoleClient } from "@/lib/supabaseServer";
 
+export const dynamic = 'force-dynamic';
+
 const hasSupabaseConfig = Boolean(
   (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL) && 
   process.env.SUPABASE_SERVICE_ROLE_KEY
