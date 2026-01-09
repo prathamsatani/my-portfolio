@@ -56,8 +56,8 @@ export default function AboutSection({ userData }: AboutSectionProps) {
           <div className="space-y-10">
             <div className="prose prose-lg text-slate-600">
               <p className="text-xl leading-relaxed font-light">
-                Hi, I&apos;m <strong className="font-semibold text-slate-900">{displayName}</strong>, an AI professional at <strong className="font-semibold text-slate-900">{displayLocation}</strong>.
-                I&apos;m currently pursuing <strong className="font-semibold text-slate-900">{displayTitle}</strong>.
+                Hi, I&apos;m <strong className="font-semibold text-slate-900">{displayName}</strong>, an aspiring ML/CV Engineer based in <strong className="font-semibold text-slate-900">{displayLocation}</strong>.
+                I&apos;m currently pursuing my Master of Science in Artificial Intelligence at Northeastern University.
               </p>
               <p className="leading-relaxed">
                 {displayBio}
@@ -69,7 +69,7 @@ export default function AboutSection({ userData }: AboutSectionProps) {
               {[
                 { icon: GraduationCap, title: "Education Focus", desc: "Master of Science in AI at Northeastern University", color: "text-teal-600" },
                 { icon: Target, title: "Career Goal", desc: "Aspiring ML Engineer building scalable AI solutions", color: "text-blue-600" },
-                { icon: Brain, title: "Specialization", desc: "Deep Learning, Computer Vision, NLP", color: "text-purple-600" }
+                { icon: Brain, title: "Specialization", desc: "Deep Learning, Computer Vision, NLP, MLOps", color: "text-purple-600" }
               ].map((item, index) => (
                 <motion.div 
                   key={index}
