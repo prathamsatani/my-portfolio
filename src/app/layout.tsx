@@ -1,30 +1,43 @@
 import React from "react";
-import { Inter } from "next/font/google";
+import type { Metadata } from "next";
+import { Inter, Instrument_Serif, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import ConditionalNavigation from "@/components/ConditionalNavigation";
 import ConditionalFooter from "@/components/ConditionalFooter";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const instrumentSerif = Instrument_Serif({
+  subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
+  variable: "--font-instrument-serif",
+});
+const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains-mono" });
 
 type LayoutProps = {
   children: React.ReactNode;
 };
 
-export const metadata = {
-  title: 'Pratham Satani - AI & Machine Learning Graduate Student',
-  description: 'Portfolio of Pratham Satani, an AI & Machine Learning Graduate Student and aspiring ML Engineer',
+const title = "Pratham Satani — ML Engineer";
+const description =
+  "Pratham Satani is an ML engineer in Boston building production RAG and agentic systems, multimodal retrieval, and the evaluation pipelines that keep them honest.";
+
+export const metadata: Metadata = {
+  metadataBase: new URL("https://pratham-satani.vercel.app"),
+  title,
+  description,
+  openGraph: { title, description, type: "website", url: "/" },
+  twitter: { card: "summary", title, description },
 };
 
 export default function RootLayout({ children }: LayoutProps) {
   return (
-    <html lang="en" className={`${inter.variable} scroll-smooth`}>
-      <body className="min-h-screen bg-white font-sans text-slate-900 antialiased selection:bg-teal-100 selection:text-teal-900">
+    <html lang="en" className={`${inter.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable}`}>
+      <body className="min-h-screen antialiased">
         <ConditionalNavigation />
-        
-        <main>
-          {children}
-        </main>
-        
+
+        <main>{children}</main>
+
         <ConditionalFooter />
       </body>
     </html>

@@ -74,7 +74,7 @@ export const getProjects = (): Project[] => {
 };
 
 export const getBlogPosts = (): BlogPost[] => {
-  return blogsData.filter(blog => blog.status === 'published') as BlogPost[];
+  return (blogsData as BlogPost[]).filter(blog => blog.status === 'published');
 };
 
 export const getFeaturedProjects = (): Project[] => {
