@@ -1,42 +1,37 @@
-# 🚀 AI & Machine Learning Portfolio
+# Pratham Satani — ML Engineer Portfolio
 
-A modern, feature-rich portfolio website built with Next.js 15, showcasing AI/ML projects with stunning 3D effects, smooth animations, and an immersive user experience.
+Personal portfolio and blog for Pratham Satani, built with Next.js 15, React 19 and Tailwind CSS 4, backed by Supabase. Live at [pratham-satani.vercel.app](https://pratham-satani.vercel.app).
 
-![Next.js](https://img.shields.io/badge/Next.js-15.5.4-black)
-![React](https://img.shields.io/badge/React-19.1.0-blue)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
+![Next.js](https://img.shields.io/badge/Next.js-15.5-black)
+![React](https://img.shields.io/badge/React-19.2-blue)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.0-38bdf8)
-![Three.js](https://img.shields.io/badge/Three.js-3D-orange)
 
 ## ✨ Features
 
-### 🎨 Visual Effects & Animations
-- **3D Particle System** - Interactive floating particles using Three.js
-- **Scroll-Triggered Animations** - Smooth reveal animations using Intersection Observer
-- **Projects Section** - Showcase of ML/AI projects with filtering and 3D effects
-- **Education Section** - Academic background and achievements
-- **Experience Section** - Professional experience timeline
-- **Contact Section** - Get in touch form with validation
-- **Blog** - Integrated blog system with dynamic content
+### 🎨 Design
+- **Minimal editorial style** - Instrument Serif display type, Inter body text and JetBrains Mono labels, loaded with `next/font`
+- **Light and dark themes** - Colour tokens in `src/app/globals.css` follow the OS `prefers-color-scheme` setting (there is no manual theme toggle)
+- **No heavy effects** - No 3D particles, cursor trails or tilt cards on public pages; one subtle CSS fade-in that respects `prefers-reduced-motion`
+- **Accessible** - Semantic headings, labelled form fields, visible `:focus-visible` outlines, WCAG AA text contrast in both themes
 
-### 🎯 User Experience
-- **Dark/Light Mode Toggle** - Floating theme switcher with smooth transitions and persistence
-- **Scroll Progress Indicator** - Visual feedback of reading progress
-- **Back to Top Button** - Floating button with smooth scroll
-- **Responsive Navigation** - Mobile-friendly menu with smooth transitions
-- **Custom Scrollbar** - Gradient-themed scrollbar
-- **Smooth Scroll** - Seamless navigation between sections
-- **Loading States** - Skeleton loaders and spinners
+### 📄 Sections
+- **Hero** - Headline, bio, résumé download, portrait and social links
+- **About** - Short statement and headline numbers
+- **Selected work** - Projects from Supabase (featured first) in a two-column grid
+- **Experience & Education** - Two columns, newest first
+- **Toolkit** - Grouped skills
+- **Contact** - Validated form that emails via SMTP
+- **Blog** - Posts with likes and comments; the nav link only appears once a post is published
 
 ### 🛠️ Technical Features
-- **Server-Side Rendering** - Next.js 15 App Router
-- **TypeScript** - Full type safety
-- **Dynamic Imports** - Code splitting for optimal performance
-- **Form Handling** - Contact form with email integration (Resend/Nodemailer)
+- **Next.js 15 App Router** with TypeScript
+- **JSON fallbacks** - Public API routes fall back to `src/data/*.json` when Supabase is not configured
+- **Contact form** - Server-side validation, rate limiting, honeypot and Nodemailer SMTP delivery
 - **Supabase-backed Blog** - Like counts and comments persisted via Supabase Postgres
 - **Secure Admin Portal** - Role-gated dashboard to manage blogs, projects, experiences, and profile data
 - **Error Tracking** - Sentry integration for monitoring
-- **SEO Optimized** - Meta tags and semantic HTML
+- **SEO** - Metadata, Open Graph and Twitter cards in `layout.tsx`
 
 ## 🚀 Quick Start
 
@@ -63,7 +58,8 @@ A modern, feature-rich portfolio website built with Next.js 15, showcasing AI/ML
   ```bash
   npm run supabase:seed
   ```
-  (equivalent to `supabase db execute --file supabase/seed.sql`). The seed file matches the JSON fallbacks in `src/data/`, so local and remote environments stay consistent. Run `npm run supabase:refresh` to execute both steps sequentially.
+  (equivalent to `supabase db execute --file supabase/seed.sql`). The seed file matches the JSON fallbacks in `src/data/`, so local and remote environments stay consistent.
+  > **Note:** the seed now *replaces* content rather than merging it. Each run deletes every row in `portfolio_profile`, `portfolio_experiences` and `portfolio_projects`, deletes the old sample blog posts (and, by cascade, their comments), then inserts the real content. It never touches auth users, `admin_audit_logs` or storage objects, and leaves blog posts written in the admin portal alone. Edits made to projects, experiences or the profile in the admin portal are overwritten on re-seed. Run `npm run supabase:refresh` to execute both steps sequentially.
 
 5. **Configure environment variables** in `.env.local` and your Vercel project settings:
 ```
@@ -132,36 +128,9 @@ Edit the data files in `src/data/`:
 
 **`blogs.json`** - Your blog posts
 
-### Customize Colors & Animations
+### Customize Colors & Type
 
-Edit `src/app/globals.css`:
-
-```css
-/* Change gradient colors */
-.gradient-text {
-  background: linear-gradient(135deg, #your-color-1, #your-color-2);
-}
-
-/* Adjust animation speed */
-@keyframes gradient-shift {
-  /* Modify duration in animation property */
-}
-```
-
-### Modify 3D Particles
-
-Edit `src/components/effects/FloatingParticles.tsx`:
-
-```typescript
-// Change particle count
-const particleCount = 2000; // Adjust this number
-
-// Change particle color
-<PointMaterial
-  color="#your-color" // Change this
-  size={0.02}          // Adjust size
-/>
-```
+Edit the tokens at the top of `src/app/globals.css`. Light values live on `:root` and dark values under `@media (prefers-color-scheme: dark)`; they are exposed to Tailwind as `bg-page`, `bg-surface`, `text-ink`, `text-muted`, `border-hairline` and `text-accent`. The type scale (`text-display-xl` … `text-body-s`) is defined in the same file.
 
 ## 🔧 Tech Stack
 
@@ -171,17 +140,9 @@ const particleCount = 2000; // Adjust this number
 - **[TypeScript](https://www.typescriptlang.org/)** - Type safety
 - **[Tailwind CSS 4](https://tailwindcss.com/)** - Utility-first CSS
 
-### Animation & 3D
-- **[Framer Motion](https://www.framer.com/motion/)** - Animation library
-- **[Three.js](https://threejs.org/)** - 3D graphics
-- **[@react-three/fiber](https://docs.pmnd.rs/react-three-fiber/)** - React renderer for Three.js
-- **[@react-three/drei](https://github.com/pmndrs/drei)** - Three.js helpers
-
 ### UI & Utilities
-- **[Lucide React](https://lucide.dev/)** - Icon library
+- **[Lucide React](https://lucide.dev/)**, **[Framer Motion](https://www.framer.com/motion/)** and **[Three.js](https://threejs.org/)** - Used by the admin portal only
 - **[React Quill](https://github.com/zenoamaro/react-quill)** - Rich text editor
-- **[React Intersection Observer](https://www.npmjs.com/package/react-intersection-observer)** - Scroll detection
-- **[date-fns](https://date-fns.org/)** - Date formatting
 
 ### Communication
 - **[Resend](https://resend.com/)** - Modern email API
@@ -332,26 +293,6 @@ const particleCount = 2000; // Adjust this number
 - All mutations go through server-only API routes that validate payloads with Zod and execute using the Supabase service-role key. No credentials ever reach the browser.
 - Sign out safely from the header; sessions are stored in secure cookies via Supabase Auth helpers.
 
-## 🎭 Animation System
-
-The portfolio uses a sophisticated animation system:
-
-### Scroll Animations
-- Triggered by Intersection Observer
-- Staggered delays for sequential reveals
-- Configurable directions (up, down, left, right)
-
-### Motion Physics
-- Spring animations for natural movement
-- Magnetic hover effects
-- 3D transforms with parallax
-
-### Performance
-- GPU-accelerated transforms
-- Dynamic imports for 3D components
-- Optimized animation configurations
-- Respects `prefers-reduced-motion`
-
 ## 📱 Responsive Design
 
 - Mobile-first approach
@@ -396,14 +337,6 @@ If you encounter peer dependency issues:
 npm install --legacy-peer-deps
 ```
 
-### 3D Particles Not Showing
-
-Ensure WebGL is enabled in your browser and that you're using a modern browser that supports Three.js.
-
-### Animations Not Working
-
-Check that JavaScript is enabled and that your browser supports ES6+ features.
-
 ## 📈 Performance
 
 - Lighthouse Score: 90+
@@ -428,8 +361,6 @@ This project is open source and available under the [MIT License](LICENSE).
 ## 🙏 Acknowledgments
 
 - Design inspiration from modern portfolio websites
-- Three.js community for 3D examples
-- Framer Motion for animation capabilities
 - Next.js team for the amazing framework
 
 ## 📞 Contact
@@ -439,12 +370,6 @@ This project is open source and available under the [MIT License](LICENSE).
 - LinkedIn: [linkedin.com/in/prathamsatani](https://linkedin.com/in/prathamsatani)
 - GitHub: [github.com/prathamsatani](https://github.com/prathamsatani)
 - Email: [pratham.satani@outlook.com](mailto:pratham.satani@outlook.com)
-
----
-
-## 📚 Additional Documentation
-
-For detailed information about all the new features and enhancements, see [ENHANCEMENTS.md](./ENHANCEMENTS.md)
 
 ---
 

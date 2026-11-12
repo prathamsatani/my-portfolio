@@ -10,7 +10,6 @@ import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
 import rehypeHighlight from "rehype-highlight";
 import type { BlogPost } from "@/lib/data";
-import { Heart, MessageCircle, Share2, ArrowLeft, Calendar, Clock } from "lucide-react";
 import "highlight.js/styles/github.css";
 import "./markdown.css";
 
@@ -217,38 +216,22 @@ export default function BlogDetailPage() {
 
   if (loading) {
     return (
-      <div className="bg-slate-50 min-h-screen pt-16">
-        <div className="max-w-4xl mx-auto px-6 lg:px-8 py-24">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-3/4 mb-8"></div>
-            <div className="w-full h-96 bg-gray-200 rounded-2xl mb-8"></div>
-            <div className="space-y-4">
-              <div className="h-4 bg-gray-200 rounded w-full"></div>
-              <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-              <div className="h-4 bg-gray-200 rounded w-4/6"></div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <p className="shell section-y label text-muted" role="status">
+        Loading post…
+      </p>
     );
   }
 
   if (notFound || !post) {
     return (
-      <div className="bg-slate-50 min-h-screen pt-16">
-        <div className="max-w-4xl mx-auto px-6 lg:px-8 py-24 text-center">
-          <h1 className="text-4xl font-bold text-slate-900 mb-4">
-            Blog Post Not Found
-          </h1>
-          <p className="text-lg text-gray-600 mb-8">
-            The blog post you&apos;re looking for doesn&apos;t exist or has been removed.
+      <div className="shell section-y">
+        <div className="mx-auto max-w-[680px]">
+          <h1 className="font-serif text-display-l">Post not found</h1>
+          <p className="mt-4 text-body-m text-muted">
+            The post you&apos;re looking for doesn&apos;t exist or has been removed.
           </p>
-          <Link
-            href="/blog"
-            className="inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-xl transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Blog
+          <Link href="/blog" className="btn mt-8">
+            Back to blog →
           </Link>
         </div>
       </div>
@@ -256,216 +239,128 @@ export default function BlogDetailPage() {
   }
 
   return (
-    <div className="bg-slate-50 min-h-screen">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-100">
-        <div className="max-w-4xl mx-auto px-6 lg:px-8 py-8">
-          <Link
-            href="/blog"
-            className="inline-flex items-center gap-2 text-teal-600 hover:text-teal-700 mb-6 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to all posts
+    <article className="shell section-y">
+      <div className="mx-auto max-w-[680px]">
+        <header className="border-b border-hairline pb-8">
+          <Link href="/blog" className="label text-muted hover:text-ink">
+            ← All posts
           </Link>
-
-          <h1 className="text-4xl lg:text-5xl font-bold text-slate-900 mb-4">
-            {post.title}
-          </h1>
-
-          <p className="text-xl text-gray-600 mb-6">{post.excerpt}</p>
-
-          <div className="flex flex-wrap items-center gap-6 text-sm text-gray-500">
-            <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
-              <span>{formatDate(post.created_date)}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4" />
-              <span>{estimateReadTime(post.content)}</span>
-            </div>
-            <div className="flex items-center gap-4">
-              <button
-                onClick={handleLike}
-                className={`flex items-center gap-1 transition-colors ${
-                  isLiked ? 'text-red-600 hover:text-red-700' : 'hover:text-teal-600'
-                }`}
-              >
-                <Heart className={`w-4 h-4 transition-all ${isLiked ? 'fill-red-600' : ''}`} />
-                <span>{likeCount}</span>
-              </button>
-              <div className="flex items-center gap-1">
-                <MessageCircle className="w-4 h-4" />
-                <span>{post.comments.length}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Tags */}
+          <h1 className="mt-6 font-serif text-display-l">{post.title}</h1>
+          {post.excerpt && <p className="mt-5 text-body-l text-muted">{post.excerpt}</p>}
+          <p className="label mt-6 flex flex-wrap gap-x-6 gap-y-2 text-muted">
+            <time dateTime={post.created_date}>{formatDate(post.created_date)}</time>
+            <span>{estimateReadTime(post.content)}</span>
+            <span>{likeCount} likes</span>
+            <span>{post.comments.length} comments</span>
+          </p>
           {post.tags && post.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-6">
+            <ul className="mt-5 flex flex-wrap gap-2">
               {post.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="px-3 py-1 bg-teal-100 text-teal-700 text-sm rounded-full font-medium"
-                >
-                  #{tag}
-                </span>
+                <li key={tag} className="tag">
+                  {tag}
+                </li>
               ))}
-            </div>
+            </ul>
           )}
-        </div>
-      </header>
+        </header>
 
-      {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-6 lg:px-8 py-12">
-        {/* Cover Image */}
         {post.cover_image_url && (
-          <div className="relative w-full aspect-video mb-12 rounded-2xl overflow-hidden shadow-lg">
+          <div className="relative mt-10 aspect-video w-full overflow-hidden rounded-[4px] bg-hairline">
             <Image
               src={post.cover_image_url}
-              alt={post.title}
+              alt=""
               fill
               className="object-cover"
-              sizes="(max-width: 1024px) 100vw, 896px"
+              sizes="(max-width: 720px) 100vw, 680px"
               unoptimized
             />
           </div>
         )}
 
-        {/* Article Content */}
-        <article className="prose prose-lg prose-slate max-w-none mb-12 prose-headings:font-bold prose-headings:text-slate-900 prose-h1:text-4xl prose-h2:text-3xl prose-h3:text-2xl prose-a:text-teal-600 prose-a:no-underline hover:prose-a:underline prose-code:text-teal-600 prose-code:bg-slate-100 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-slate-900 prose-pre:text-slate-100 prose-blockquote:border-l-teal-600 prose-blockquote:text-slate-700 prose-img:rounded-xl prose-img:shadow-lg">
-          <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
-            rehypePlugins={[rehypeRaw, rehypeSanitize, rehypeHighlight]}
-          >
+        <div className="prose mt-10">
+          <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw, rehypeSanitize, rehypeHighlight]}>
             {post.content}
           </ReactMarkdown>
-        </article>
-
-        {/* Share & Like Actions */}
-        <div className="flex items-center justify-between py-8 border-y border-gray-200 mb-12">
-          <button
-            onClick={handleLike}
-            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-colors ${
-              isLiked
-                ? 'bg-red-50 border-2 border-red-600 text-red-600 hover:bg-red-100'
-                : 'bg-white border-2 border-teal-600 text-teal-600 hover:bg-teal-50'
-            }`}
-          >
-            <Heart className={`w-5 h-5 transition-all ${isLiked ? 'fill-red-600' : ''}`} />
-            <span>{isLiked ? 'Unlike' : 'Like'} ({likeCount})</span>
-          </button>
-
-          <button
-            onClick={handleShare}
-            className="flex items-center gap-2 px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white rounded-xl font-medium transition-colors"
-          >
-            <Share2 className="w-5 h-5" />
-            <span>Share</span>
-          </button>
         </div>
 
-        {shareFeedback && (
-          <div className="mb-6 p-4 bg-teal-100 text-teal-800 rounded-lg text-center">
-            {shareFeedback}
-          </div>
-        )}
+        <div className="mt-12 flex flex-wrap items-center gap-4 border-y border-hairline py-8">
+          <button type="button" onClick={handleLike} aria-pressed={isLiked} className={`btn ${isLiked ? "btn-primary" : ""}`}>
+            {isLiked ? "♥ Liked" : "♡ Like"} ({likeCount})
+          </button>
+          <button type="button" onClick={handleShare} className="btn">
+            Share →
+          </button>
+          {shareFeedback && (
+            <p className="label text-accent" aria-live="polite">
+              {shareFeedback}
+            </p>
+          )}
+        </div>
 
-        {/* Comments Section */}
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-            <MessageCircle className="w-6 h-6 text-teal-600" />
+        <section id="comments" aria-labelledby="comments-title" className="mt-12">
+          <h2 id="comments-title" className="font-serif text-display-s">
             Comments ({post.comments.length})
           </h2>
 
-          {/* Existing Comments */}
           {post.comments.length > 0 && (
-            <div className="space-y-4 mb-8">
+            <ol className="mt-6">
               {post.comments.map((comment) => (
-                <div
-                  key={comment.id}
-                  className="bg-white border border-slate-200 rounded-lg p-6"
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="font-semibold text-slate-900">
-                      {comment.author}
-                    </span>
-                    <span className="text-sm text-gray-500">
-                      {formatCommentDate(comment.date)}
-                    </span>
-                  </div>
-                  <p className="text-gray-700 leading-relaxed">
-                    {comment.message}
+                <li key={comment.id} className="border-b border-hairline py-6">
+                  <p className="label flex justify-between gap-4 text-muted">
+                    <span className="text-ink">{comment.author}</span>
+                    <time dateTime={comment.date}>{formatCommentDate(comment.date)}</time>
                   </p>
-                </div>
+                  <p className="mt-3 text-body-m">{comment.message}</p>
+                </li>
               ))}
-            </div>
+            </ol>
           )}
 
-          {/* Add Comment Form */}
-          <div className="bg-white border border-slate-200 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-slate-900 mb-4">
-              Leave a comment
-            </h3>
-            <form onSubmit={handleCommentSubmit} className="space-y-4">
-              <div>
-                <label
-                  htmlFor="author"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Your name
-                </label>
-                <input
-                  type="text"
-                  id="author"
-                  value={commentForm.author}
-                  onChange={(e) =>
-                    setCommentForm({ ...commentForm, author: e.target.value })
-                  }
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                  placeholder="John Doe"
-                  required
-                />
-              </div>
+          <form onSubmit={handleCommentSubmit} className="mt-10 space-y-8">
+            <h3 className="label text-muted">Leave a comment</h3>
+            <div>
+              <label htmlFor="author" className="label text-muted">
+                Your name
+              </label>
+              <input
+                type="text"
+                id="author"
+                value={commentForm.author}
+                onChange={(e) => setCommentForm({ ...commentForm, author: e.target.value })}
+                className="mt-2 w-full border-0 border-b border-ink bg-transparent py-2 text-body-m"
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="message" className="label text-muted">
+                Your comment
+              </label>
+              <textarea
+                id="message"
+                value={commentForm.message}
+                onChange={(e) => setCommentForm({ ...commentForm, message: e.target.value })}
+                rows={4}
+                aria-describedby="message-count"
+                className="mt-2 w-full resize-none border-0 border-b border-ink bg-transparent py-2 text-body-m"
+                required
+              />
+              <p id="message-count" className="label mt-2 text-muted">
+                {commentForm.message.length}/500 characters (min 5)
+              </p>
+            </div>
 
-              <div>
-                <label
-                  htmlFor="message"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Your comment
-                </label>
-                <textarea
-                  id="message"
-                  value={commentForm.message}
-                  onChange={(e) =>
-                    setCommentForm({ ...commentForm, message: e.target.value })
-                  }
-                  rows={4}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none"
-                  placeholder="Share your thoughts... (5-500 characters)"
-                  required
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  {commentForm.message.length}/500 characters
-                </p>
-              </div>
+            {commentError && (
+              <p role="alert" className="text-body-s text-accent">
+                {commentError}
+              </p>
+            )}
 
-              {commentError && (
-                <p className="text-sm text-red-600">{commentError}</p>
-              )}
-
-              <button
-                type="submit"
-                disabled={commentSubmitting}
-                className="px-6 py-3 bg-teal-600 hover:bg-teal-700 disabled:bg-slate-400 text-white rounded-lg font-medium transition-colors"
-              >
-                {commentSubmitting ? "Posting..." : "Post Comment"}
-              </button>
-            </form>
-          </div>
+            <button type="submit" disabled={commentSubmitting} className="btn btn-primary">
+              {commentSubmitting ? "Posting…" : "Post comment →"}
+            </button>
+          </form>
         </section>
-      </main>
-    </div>
+      </div>
+    </article>
   );
 }

@@ -30,7 +30,7 @@ const filesToMigrate = [
     description: 'Profile image',
   },
   {
-    localPath: 'public/Pratham Satani.pdf',
+    localPath: 'public/Pratham_Satani_MLE.pdf',
     storagePath: 'documents/resumes/Pratham-Satani.pdf',
     description: 'Resume PDF',
   },

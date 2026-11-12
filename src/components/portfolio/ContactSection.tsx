@@ -1,287 +1,150 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { CheckCircle, Github, Linkedin, Mail, MapPin, Phone, Send } from "lucide-react";
-import { UserData, getUserData } from "@/lib/data";
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { UserData } from "@/lib/data";
 
-export default function ContactSection() {
-  const [userData, setUserData] = useState<UserData | null>(null);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    message: '',
-    website: '' // Honeypot field
-  });
+type Field = "name" | "email" | "message";
+const emptyForm = { name: "", email: "", message: "", website: "" }; // website = honeypot
+
+// Mirrors the checks in /api/contact so users see errors before submitting.
+const validate = (form: typeof emptyForm) => {
+  const errors: Partial<Record<Field, string>> = {};
+  if (!/^[a-zA-Z\s\-']{2,50}$/.test(form.name.trim())) errors.name = "Enter your name (letters, spaces and hyphens).";
+  if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(form.email.trim())) errors.email = "Enter a valid email address.";
+  if (form.message.trim().length < 10) errors.message = "Message should be at least 10 characters.";
+  else if (form.message.length > 5000) errors.message = "Keep the message under 5000 characters.";
+  return errors;
+};
+
+const fieldClass =
+  "mt-2 w-full border-0 border-b border-ink bg-transparent py-2 text-body-m text-ink placeholder:text-muted";
+
+export default function ContactSection({ userData }: { userData: UserData }) {
+  const [formData, setFormData] = useState(emptyForm);
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<Field, string>>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadUserData();
-  }, []);
-
-  const loadUserData = async () => {
-    try {
-      const response = await fetch("/api/portfolio/user");
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch user data: ${response.status}`);
-      }
-
-      const data = (await response.json()) as UserData;
-      setUserData(data);
-    } catch (error) {
-      console.error("Error loading user data:", error);
-      setUserData(getUserData());
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const errors = validate(formData);
+    setFieldErrors(errors);
+    if (Object.keys(errors).length > 0) return;
+
     setIsSubmitting(true);
     setError(null);
-
     try {
-      const response = await fetch('/api/contact', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-
       const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to send message');
-      }
-
+      if (!response.ok) throw new Error(data.error || "Failed to send message");
       setSubmitted(true);
-      setFormData({ name: '', email: '', message: '', website: '' });
-    } catch (error) {
-      console.error('Error sending message:', error);
-      setError(error instanceof Error ? error.message : 'Failed to send message. Please try again.');
+      setFormData(emptyForm);
+    } catch (err) {
+      console.error("Error sending message:", err);
+      setError(err instanceof Error ? err.message : "Failed to send message. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
+  const fieldProps = (field: Field) => ({
+    id: `contact-${field}`,
+    name: field,
+    value: formData[field],
+    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      setFormData((prev) => ({ ...prev, [field]: e.target.value })),
+    "aria-invalid": Boolean(fieldErrors[field]),
+    "aria-describedby": fieldErrors[field] ? `contact-${field}-error` : undefined,
+    className: fieldClass,
+  });
+
+  const renderError = (field: Field) =>
+    fieldErrors[field] && (
+      <p id={`contact-${field}-error`} className="mt-2 text-body-s text-accent">
+        {fieldErrors[field]}
+      </p>
+    );
 
   return (
-    <section id="contact" className="py-24 bg-white">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="mb-16"
-        >
-          <h2 className="text-3xl font-bold text-slate-900 mb-4">
-            Get in Touch
+    <section id="contact" aria-labelledby="contact-title" className="shell section-y">
+      <p className="label mb-8 text-accent">04 — Contact</p>
+      <div className="grid gap-16 lg:grid-cols-[1fr_500px] lg:gap-20">
+        <div>
+          <h2 id="contact-title" className="font-serif text-display-l">
+            Have a problem worth modelling? Let&apos;s talk.
           </h2>
-          <p className="text-lg text-slate-600 max-w-2xl">
-            Interested in collaborating or discussing opportunities? I&apos;d love to hear from you.
-          </p>
-        </motion.div>
+          {userData.email && (
+            <a
+              href={`mailto:${userData.email}`}
+              className="mt-8 inline-block break-all text-body-l text-accent underline underline-offset-4"
+            >
+              {userData.email}
+            </a>
+          )}
+          <p className="label mt-6 text-muted">{userData.location || "Boston, MA"}</p>
+        </div>
 
-        <div className="grid lg:grid-cols-2 gap-16 items-start">
-          {/* Contact Info */}
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="space-y-8"
-          >
-            <div>
-              <p className="text-slate-600 text-lg leading-relaxed mb-8">
-                I&apos;m always open to discussing new opportunities, exciting projects, 
-                or just having a conversation about AI and machine learning. 
-                Feel free to reach out!
-              </p>
+        <div>
+          {submitted ? (
+            <div role="status" className="border-t border-hairline pt-6">
+              <p className="font-serif text-display-s">Message sent.</p>
+              <p className="mt-2 text-body-m text-muted">Thanks for reaching out. I&apos;ll get back to you soon.</p>
+              <button type="button" onClick={() => setSubmitted(false)} className="btn mt-6">
+                Send another →
+              </button>
             </div>
-
-            {/* Contact Details */}
-            <div className="space-y-6">
-              {userData?.email && (
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-slate-50 rounded-xl">
-                    <Mail className="w-6 h-6 text-slate-900" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-slate-900">Email</p>
-                    <a 
-                      href={`mailto:${userData.email}`}
-                      className="text-slate-600 hover:text-slate-900 transition-colors"
-                    >
-                      {userData.email}
-                    </a>
-                  </div>
-                </div>
-              )}
-
-              {userData?.location && (
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-slate-50 rounded-xl">
-                    <MapPin className="w-6 h-6 text-slate-900" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-slate-900">Location</p>
-                    <p className="text-slate-600">{userData.location}</p>
-                  </div>
-                </div>
-              )}
-
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-slate-50 rounded-xl">
-                  <Phone className="w-6 h-6 text-slate-900" />
-                </div>
-                <div>
-                  <p className="font-medium text-slate-900">Status</p>
-                  <p className="text-slate-600">Available for ML Engineer roles</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Social Links */}
-            <div className="pt-8 border-t border-slate-200">
-              <h4 className="font-semibold mb-4 text-slate-900">Connect with me</h4>
-              <div className="flex gap-4">
-                {userData?.github_url && (
-                  <a 
-                    href={userData.github_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-3 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors"
-                  >
-                    <Github className="w-5 h-5 text-slate-700 hover:text-slate-900" />
-                  </a>
-                )}
-                {userData?.linkedin_url && (
-                  <a 
-                    href={userData.linkedin_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-3 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors"
-                  >
-                    <Linkedin className="w-5 h-5 text-slate-700 hover:text-slate-900" />
-                  </a>
-                )}
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Contact Form */}
-          <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="bg-slate-50 rounded-2xl p-8"
-          >
-            {submitted ? (
-              <div className="text-center py-12">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <CheckCircle className="w-8 h-8 text-green-600" />
-                </div>
-                <h3 className="text-2xl font-bold mb-4 text-slate-900">Message Sent!</h3>
-                <p className="text-slate-600 mb-6">
-                  Thank you for reaching out. I&apos;ll get back to you soon.
+          ) : (
+            <form onSubmit={handleSubmit} noValidate className="space-y-8">
+              {error && (
+                <p role="alert" className="border-l-2 border-accent pl-4 text-body-s text-accent">
+                  {error}
                 </p>
-                <button
-                  onClick={() => {
-                    setSubmitted(false);
-                    setError(null);
-                  }}
-                  className="border-2 border-slate-300 text-slate-900 hover:bg-slate-200 px-6 py-2 rounded-lg transition-colors"
-                >
-                  Send Another Message
-                </button>
+              )}
+
+              {/* Honeypot field - hidden from users, catches bots */}
+              <div style={{ position: "absolute", left: "-9999px" }} aria-hidden="true">
+                <input
+                  type="text"
+                  name="website"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={formData.website}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, website: e.target.value }))}
+                />
               </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div>
-                  <h3 className="text-2xl font-bold mb-6 text-slate-900">Send me a message</h3>
-                  {error && (
-                    <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-                      {error}
-                    </div>
-                  )}
-                </div>
 
-                {/* Honeypot field - hidden from users, catches bots */}
-                <div style={{ position: 'absolute', left: '-9999px' }} aria-hidden="true">
-                  <input
-                    type="text"
-                    name="website"
-                    tabIndex={-1}
-                    autoComplete="off"
-                    value={formData.website}
-                    onChange={(e) => handleInputChange('website', e.target.value)}
-                  />
-                </div>
+              <div>
+                <label htmlFor="contact-name" className="label text-muted">
+                  Name
+                </label>
+                <input type="text" autoComplete="name" required {...fieldProps("name")} />
+                {renderError("name")}
+              </div>
+              <div>
+                <label htmlFor="contact-email" className="label text-muted">
+                  Email
+                </label>
+                <input type="email" autoComplete="email" required {...fieldProps("email")} />
+                {renderError("email")}
+              </div>
+              <div>
+                <label htmlFor="contact-message" className="label text-muted">
+                  Message
+                </label>
+                <textarea rows={5} required {...fieldProps("message")} className={`${fieldClass} resize-none`} />
+                {renderError("message")}
+              </div>
 
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700">Name</label>
-                    <input
-                      required
-                      value={formData.name}
-                      onChange={(e) => handleInputChange('name', e.target.value)}
-                      placeholder="Your full name"
-                      className="w-full px-4 py-2 bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-slate-900 rounded-lg focus:outline-none focus:ring-1 focus:ring-slate-900 transition-all"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700">Email</label>
-                    <input
-                      required
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => handleInputChange('email', e.target.value)}
-                      placeholder="your.email@example.com"
-                      className="w-full px-4 py-2 bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-slate-900 rounded-lg focus:outline-none focus:ring-1 focus:ring-slate-900 transition-all"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-700">Message</label>
-                  <textarea
-                    required
-                    rows={5}
-                    value={formData.message}
-                    onChange={(e) => handleInputChange('message', e.target.value)}
-                    placeholder="Tell me about your project or opportunity..."
-                    className="w-full px-4 py-2 bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-slate-900 rounded-lg resize-none focus:outline-none focus:ring-1 focus:ring-slate-900 transition-all"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full bg-slate-900 hover:bg-slate-800 text-white py-4 text-lg font-medium rounded-xl transition-all duration-200 inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isSubmitting ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                      Sending...
-                    </div>
-                  ) : (
-                    <>
-                      <Send className="w-5 h-5" />
-                      Send Message
-                    </>
-                  )}
-                </button>
-              </form>
-            )}
-          </motion.div>
+              <button type="submit" disabled={isSubmitting} className="btn btn-primary">
+                {isSubmitting ? "Sending…" : "Send message →"}
+              </button>
+            </form>
+          )}
         </div>
       </div>
     </section>
